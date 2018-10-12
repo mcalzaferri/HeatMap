@@ -37,7 +37,7 @@
 		<link>
 			<name>common</name>
 			<type>2</type>
-			<location>M:/git/HeatMap/Messages/src</location>
+			<location>M:/git/HeatMap/Common/src</location>
 		</link>
 	</linkedResources>
 </projectDescription>
