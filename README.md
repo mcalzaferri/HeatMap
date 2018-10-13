@@ -1,8 +1,8 @@
 # HeatMap
 ## Messages Client -> Server
-* postRegisterRequest(GeoLocation)
-* postDataRequest(id, currentTemperature, timestamp)
+* postIdRequest(GeoLocation) Data = "messageType=idRequest&geoLocation=latitude,longitude"
+* postData(id, currentTemperature, timestamp) Data = "messageType=temperatureDataPost&id=AE33-78EC-F65B-C46E&timestamp=1539430885"
 
 ## Messages Server -> Client
-* postRegisterResponse(id)
-* postDataResponse()
+* postRegisterResponse(id) Data = "messageType=idResponse&id=AE33-78EC-F65B-C46E"
+* postDataResponse() Data = "messageType=dataPostResponse"
