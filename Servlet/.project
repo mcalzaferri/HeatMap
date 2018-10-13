@@ -37,7 +37,7 @@
 		<link>
 			<name>common</name>
 			<type>2</type>
-			<location>M:/git/HeatMap/Common/src</location>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/src/main</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
