@@ -1,7 +1,8 @@
 # HeatMap
 ## Messages Client -> Server
-* register(GeoLocation)
-* postData(id, currentTemperature, timestamp)
+* postRegisterRequest(GeoLocation)
+* postDataRequest(id, currentTemperature, timestamp)
 
 ## Messages Server -> Client
-* assignId(id)
+* postRegisterResponse(id)
+* postDataResponse()
