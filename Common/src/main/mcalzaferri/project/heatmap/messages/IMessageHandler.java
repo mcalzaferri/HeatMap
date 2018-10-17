@@ -18,6 +18,8 @@ public interface IMessageHandler {
             case DataResponseMessage.messageType:
                 handler.handleMessage(new DataResponseMessage(message));
                 break;
+            case ErrorResponseMessage.messageType:
+                handler.handleMessage(new ErrorResponseMessage(message));
             default:
                 throw new UnsupportedOperationException("Message of type: " + messageType + " is not yet implemented.");
             }
@@ -26,4 +28,5 @@ public interface IMessageHandler {
     public void handleMessage(DataResponseMessage msg);
     public void handleMessage(IdRequestMessage msg);
     public void handleMessage(IdResponseMessage msg);
+    public void handleMessage(ErrorResponseMessage msg);
 }
