@@ -19,6 +19,10 @@ public class IdResponseMessage extends HttpMessage{
         idAttribute.value = id;
     }
 
+    public String getId(){
+        return idAttribute.value;
+    }
+
     @Override
     protected void initAttributes() {
         idAttribute = new StringAttribute("id");

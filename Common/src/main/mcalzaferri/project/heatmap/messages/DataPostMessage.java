@@ -19,6 +19,10 @@ public class DataPostMessage extends HttpMessage{
         temperatureAttribute.value = temperature;
     }
 
+    public double getTemperature(){
+        return temperatureAttribute.value;
+    }
+
     @Override
     protected void initAttributes() {
         temperatureAttribute = new DoubleAttribute("temperature");

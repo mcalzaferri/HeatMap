@@ -16,9 +16,13 @@ public class IdRequestMessage extends HttpMessage{
         super(messageType);
     }
 
-    public void setGeoLocationAttribute(GeoLocation geoLocation){
+    public void setGeoLocation(GeoLocation geoLocation){
         geoLocationAttribute.value = geoLocation;
     }
+    public GeoLocation getGeoLocation(){
+        return geoLocationAttribute.value;
+    }
+
 
     @Override
     protected void initAttributes() {
