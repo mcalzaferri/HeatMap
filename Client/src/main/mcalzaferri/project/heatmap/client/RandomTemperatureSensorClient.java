@@ -1,6 +1,7 @@
 package mcalzaferri.project.heatmap.client;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.security.SecureRandom;
 
 import mcalzaferri.geo.GeoLocation;
@@ -42,9 +43,10 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 	private boolean connect() {
 		try {
 			client.connect();
+			System.out.println("Successfully connected to server!");
 			return true;
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
+			System.err.println("Could not connect to server!");
 			return false;
 		}
 	}
@@ -78,6 +80,8 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 		try {
 			String response = client.post(message);
 			IMessageHandler.handleMessage(response, this);
+		} catch (ConnectException ce) {
+			System.err.println("Lost connection to server!");
 		} catch (IOException ioe) {
 			ioe.printStackTrace();
 			connected = false;
@@ -94,11 +98,14 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 
 	@Override
 	public void handleMessage(DataResponseMessage msg) {
+		System.out.println("DataResponseMessage received!");
 	}
 
 	@Override
 	public void handleMessage(IdResponseMessage msg) {
+		System.out.println("IdResponseMessage received!");
 		id = msg.getId();
+		System.out.println(msg.getId());
 	}
 
 	@Override
@@ -109,10 +116,12 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 
 	@Override
 	public void handleMessage(IdRequestMessage msg) {
+		System.out.println("IdRequestMessage received!");
 	}
 
 	@Override
 	public void handleMessage(DataPostMessage msg) {
+		System.out.println("DataPostMessage received!");
 	}
 
 }
