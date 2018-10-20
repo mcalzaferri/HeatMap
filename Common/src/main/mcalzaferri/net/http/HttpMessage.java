@@ -52,7 +52,7 @@ public abstract class HttpMessage implements ITransferable {
 		for(String key : attributes.keySet()){
 			data.putAttribute(key, attributes.get(key).encode());
 		}
-		return data.toString();
+		return data.encode();
 	}
 
 	@Override
