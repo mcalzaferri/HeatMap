@@ -20,6 +20,7 @@ public interface IMessageHandler {
                 break;
             case ErrorResponseMessage.messageType:
                 handler.handleMessage(new ErrorResponseMessage(message));
+                break;
             default:
                 throw new UnsupportedOperationException("Message of type: " + messageType + " is not yet implemented.");
             }
