@@ -1,27 +1,26 @@
-package mcalzaferri.net.https;
+package mcalzaferri.net.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import mcalzaferri.net.IHttpClient;
 import mcalzaferri.net.http.HttpMessage;
 
-public class HttpsClient implements IHttpClient{
-	private HttpsURLConnection con;
+public class HttpClient implements IHttpClient{
+	private HttpURLConnection con;
 	private URL url;
 	private int connectTimeout;
 	
-	public HttpsClient(String url) throws IOException {
+	public HttpClient(String url) throws IOException {
 		this.url = new URL(url);
 		connectTimeout = 0;
 	}
 	public void connect() throws IOException {
-		con = (HttpsURLConnection) this.url.openConnection();
+		con = (HttpURLConnection) this.url.openConnection();
 		con.setRequestMethod("POST");
 		con.setRequestProperty("User-Agent", "Mozilla/5.0");
 		con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");

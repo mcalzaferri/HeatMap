@@ -2,21 +2,44 @@ import java.io.IOException;
 import java.util.Random;
 
 import mcalzaferri.geo.GeoLocation;
+import mcalzaferri.net.IHttpClient;
+import mcalzaferri.net.http.HttpClient;
+import mcalzaferri.net.https.HttpsClient;
 import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 
 /**
  * Test
  */
 public class Test {
-    public static void main(String[] args) {
-        for (int i = 0; i < 10; i++) {
-            try {
-                Thread t = new Thread(new RandomTemperatureSensorClient("https://heatmap-219120.appspot.com/datapool", createRandomGeoLocation()));
-                t.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+
+	public static void main(String[] args) throws IOException, InterruptedException {
+    	boolean runLocal = true;
+    	boolean runOnThreads = false;
+    	String host;
+    	IHttpClient client;
+    	
+    	//initialization
+    	if(runLocal) {
+    		host = "http://localhost:8080/datapool";
+    		client = new HttpClient(host);
+    	}else {
+    		host = "https://heatmap-219120.appspot.com/datapool";
+    		client = new HttpsClient(host);
+    	}
+    	
+    	//run
+    	if(runOnThreads) {
+        	for(int i = 0; i < 50; i++) {
+        		Thread t = new Thread(new RandomTemperatureSensorClient(client, createRandomGeoLocation()));
+        		
+        		t.start();
+        		Thread.sleep(100);
+        	}
+    	}else {
+    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(client, createRandomGeoLocation());
+    		sensor.run();
+    	}
+
     }
 private static GeoLocation createRandomGeoLocation(){
     Random rm = new Random();

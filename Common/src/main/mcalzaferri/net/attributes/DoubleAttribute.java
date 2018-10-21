@@ -1,8 +1,4 @@
 package mcalzaferri.net.attributes;
-
-/**
- * GeoLocationAttribute
- */
 public class DoubleAttribute extends Attribute {
     public double value;
 

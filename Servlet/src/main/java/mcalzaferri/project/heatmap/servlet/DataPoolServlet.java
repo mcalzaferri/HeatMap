@@ -1,8 +1,9 @@
-package mcalzaferri.heatmap.servlet;
+package mcalzaferri.project.heatmap.servlet;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -10,13 +11,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.cloud.Timestamp;
+import com.google.cloud.datastore.LatLng;
+
 import mcalzaferri.net.http.HttpMessage;
-import mcalzaferri.project.heatmap.messages.DataPostMessage;
-import mcalzaferri.project.heatmap.messages.DataResponseMessage;
-import mcalzaferri.project.heatmap.messages.ErrorResponseMessage;
-import mcalzaferri.project.heatmap.messages.IMessageHandler;
-import mcalzaferri.project.heatmap.messages.IdRequestMessage;
-import mcalzaferri.project.heatmap.messages.IdResponseMessage;
+import mcalzaferri.project.heatmap.data.TemperatureDataStore;
+import mcalzaferri.project.heatmap.data.objects.*;
+import mcalzaferri.project.heatmap.messages.*;
 
 @WebServlet(
 	    name = "Datapool",
@@ -28,6 +29,12 @@ public class DataPoolServlet extends HttpServlet implements IMessageHandler{
 	 * 
 	 */
 	private static final long serialVersionUID = 4406189919961725742L;
+	private TemperatureDataStore dataStore;
+	
+	public DataPoolServlet() {
+		dataStore = TemperatureDataStore.getInstance();
+	}
+	
 	private HttpMessage responseMsg;
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -40,16 +47,25 @@ public class DataPoolServlet extends HttpServlet implements IMessageHandler{
 			responseMsg = new ErrorResponseMessage();
 			((ErrorResponseMessage)responseMsg).setErrorDescription("Message not supported");
 			IMessageHandler.handleMessage(sb.toString(), this);
+			response.getWriter().write(responseMsg.encode());
 		}catch(Exception e) {
 			responseMsg = new ErrorResponseMessage();
 			((ErrorResponseMessage)responseMsg).setErrorDescription(e.toString());
+			response.getWriter().write(responseMsg.encode());
+			e.printStackTrace(response.getWriter());
 		}
-		response.getWriter().write(responseMsg.encode());
+		
 	}
 
 	@Override
 	public void handleMessage(DataPostMessage msg) {
 		responseMsg = new DataResponseMessage();
+		if(dataStore.containsSensor(msg.getSensorId())) {
+			TemperatureData data = new TemperatureData(msg.getSensorId(), Timestamp.of(msg.getTimestamp()), msg.getTemperature());
+			dataStore.storeData(data);
+		}else {
+			throw new NoSuchElementException("The sensor with the id " + msg.getSensorId() + " does not exist");
+		}
 	}
 
 	@Override
@@ -59,7 +75,8 @@ public class DataPoolServlet extends HttpServlet implements IMessageHandler{
 	@Override
 	public void handleMessage(IdRequestMessage msg) {
 		responseMsg = new IdResponseMessage();
-		((IdResponseMessage)responseMsg).setId("sensor123456789");
+		TemperatureSensor sensor = new TemperatureSensor(LatLng.of(msg.getGeoLocation().latitude, msg.getGeoLocation().longitude));
+		((IdResponseMessage)responseMsg).setId(dataStore.createSensor(sensor));
 	}
 
 	@Override

@@ -3,27 +3,28 @@ package mcalzaferri.project.heatmap.client;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.security.SecureRandom;
+import java.util.Date;
 
 import mcalzaferri.geo.GeoLocation;
+import mcalzaferri.net.IHttpClient;
 import mcalzaferri.net.http.HttpMessage;
-import mcalzaferri.net.https.HttpsClient;
 import mcalzaferri.project.heatmap.messages.*;
 
 public class RandomTemperatureSensorClient implements Runnable, IMessageHandler {
 	public static final int connectTimeout = 5000; // ms
-	private HttpsClient client;
-	private String id;
+	private IHttpClient client;
+	private long id;
 	private boolean connected;
 	private GeoLocation location;
 
-	public RandomTemperatureSensorClient(String defaultId, String server, GeoLocation location) throws IOException {
-		this(server, location);
+	public RandomTemperatureSensorClient(long defaultId, IHttpClient client, GeoLocation location) throws IOException {
+		this(client, location);
 		id = defaultId;
 	}
 
-	public RandomTemperatureSensorClient(String server, GeoLocation location) throws IOException {
+	public RandomTemperatureSensorClient(IHttpClient client, GeoLocation location) throws IOException {
 		this.location = location;
-		client = new HttpsClient(server);
+		this.client = client;
 		client.setConnectTimeout(connectTimeout);
 	}
 
@@ -57,7 +58,7 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 	}
 
 	private void updateServer() {
-		if (id == null) {
+		if (id == 0) {
 			requestId();
 		} else {
 			sendData();
@@ -72,7 +73,9 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 
 	private void sendData() {
 		DataPostMessage msg = new DataPostMessage();
-		msg.setTemperature(new SecureRandom().nextDouble());
+		msg.setTemperature(new SecureRandom().nextDouble() * 40);
+		msg.setSensorId(id);
+		msg.setTimestamp(new Date());
 		postMessage(msg);
 	}
 
@@ -98,13 +101,13 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 
 	@Override
 	public void handleMessage(DataResponseMessage msg) {
-		System.out.println("DataResponseMessage received!");
+		System.out.println(id + " DataResponseMessage received!");
 	}
 
 	@Override
 	public void handleMessage(IdResponseMessage msg) {
-		System.out.println("IdResponseMessage received!");
 		id = msg.getId();
+		System.out.println(id + " IdResponseMessage received!");
 		System.out.println(msg.getId());
 	}
 
@@ -121,7 +124,7 @@ public class RandomTemperatureSensorClient implements Runnable, IMessageHandler 
 
 	@Override
 	public void handleMessage(DataPostMessage msg) {
-		System.out.println("DataPostMessage received!");
+		System.out.println(id + " DataPostMessage received!");
 	}
 
 }

@@ -24,6 +24,6 @@ public class TimestampAttribute extends Attribute {
 
     @Override
     public void decode(String data) {
-        value.setTime(Long.parseLong(data));
+    	value = new Date(Long.parseLong(data));
     }
 }
