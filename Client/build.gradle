@@ -1,6 +1,15 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
+sourceSets {
+    main {
+        java {
+            srcDirs 'src/main'
+            srcDirs '../Common/src/common'
+        }
+    }
+}
+
 repositories {
     mavenCentral()
     jcenter()

@@ -24,7 +24,7 @@
 		<link>
 			<name>common</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Common/src/main</locationURI>
+			<location>D:/git/HeatMap/Common/src/common</location>
 		</link>
 	</linkedResources>
 	<variableList>
