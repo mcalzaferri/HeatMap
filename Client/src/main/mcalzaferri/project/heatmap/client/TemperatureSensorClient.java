@@ -1,15 +1,16 @@
 package mcalzaferri.project.heatmap.client;
 
 import java.io.IOException;
+import java.util.Date;
 
 import mcalzaferri.geo.GeoLocation;
 import mcalzaferri.net.http.HttpPostClient;
+import mcalzaferri.project.heatmap.common.entities.IdentifiedTemperatureSensorData;
 
 public abstract class TemperatureSensorClient extends SensorClient{
 
 	public TemperatureSensorClient(long defaultId, HttpPostClient client, GeoLocation location) throws IOException {
 		super(defaultId, client, location);
-		// TODO Auto-generated constructor stub
 	}
 	
 	public TemperatureSensorClient(HttpPostClient client, GeoLocation location) throws IOException {
@@ -18,8 +19,7 @@ public abstract class TemperatureSensorClient extends SensorClient{
 	
 	@Override
 	protected Object getSensorData() {
-		// TODO Auto-generated method stub
-		return null;
+		return new IdentifiedTemperatureSensorData(getTemperature(), new Date(), getId());
 	}
 	
 	public abstract double getTemperature();

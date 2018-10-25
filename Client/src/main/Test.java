@@ -2,9 +2,7 @@ import java.io.IOException;
 import java.util.Random;
 
 import mcalzaferri.geo.GeoLocation;
-import mcalzaferri.net.IHttpClient;
-import mcalzaferri.net.http.HttpClient;
-import mcalzaferri.net.https.HttpsClient;
+import mcalzaferri.net.http.HttpPostClient;
 import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 
 /**
@@ -16,15 +14,15 @@ public class Test {
     	boolean runLocal = true;
     	boolean runOnThreads = false;
     	String host;
-    	IHttpClient client;
+    	HttpPostClient client;
     	
     	//initialization
     	if(runLocal) {
     		host = "http://localhost:8080/datapool";
-    		client = new HttpClient(host);
+    		client = new HttpPostClient(host);
     	}else {
     		host = "https://heatmap-219120.appspot.com/datapool";
-    		client = new HttpsClient(host);
+    		client = new HttpPostClient(host);
     	}
     	
     	//run
