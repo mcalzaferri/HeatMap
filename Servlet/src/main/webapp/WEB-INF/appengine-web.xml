@@ -3,10 +3,10 @@
 
   <threadsafe>true</threadsafe>
   <static-files>
-    <include path="/**.html"></include>
-    <include path="/**.css"></include>
+    <include path="map.html"></include>
+    <include path="index.html"></include>
     <include path="bundle.js"></include>
-    <exclude path="/node_modules/**.html"></exclude>
+    <include path="map.js"></include>
   </static-files>
   <sessions-enabled>false</sessions-enabled>
   <runtime>java8</runtime>

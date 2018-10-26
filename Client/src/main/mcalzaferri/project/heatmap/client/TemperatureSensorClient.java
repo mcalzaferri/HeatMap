@@ -5,7 +5,7 @@ import java.util.Date;
 
 import mcalzaferri.geo.GeoLocation;
 import mcalzaferri.net.http.HttpPostClient;
-import mcalzaferri.project.heatmap.common.entities.IdentifiedTemperatureSensorData;
+import mcalzaferri.project.heatmap.common.entities.TemperatureSensorData;
 
 public abstract class TemperatureSensorClient extends SensorClient{
 
@@ -19,7 +19,7 @@ public abstract class TemperatureSensorClient extends SensorClient{
 	
 	@Override
 	protected Object getSensorData() {
-		return new IdentifiedTemperatureSensorData(getTemperature(), new Date(), getId());
+		return new TemperatureSensorData(getTemperature(), new Date());
 	}
 	
 	public abstract double getTemperature();
