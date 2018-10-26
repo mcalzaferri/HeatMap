@@ -37,7 +37,7 @@
 		<link>
 			<name>common</name>
 			<type>2</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Common/src/main</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Common/src/common</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
