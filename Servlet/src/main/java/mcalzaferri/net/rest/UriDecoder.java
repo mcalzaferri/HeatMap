@@ -1,26 +1,29 @@
 package mcalzaferri.net.rest;
 
-public class URIDecoder {
+public class UriDecoder {
 	private String uri;
 	private String root;
-	private String[] children;
-	public URIDecoder(String uri) {
+	private String[] uriParts;
+	public UriDecoder(String uri) {
 		this.uri = uri;
+		while(this.uri.startsWith("/")) {
+			this.uri = this.uri.substring(1);
+		}
 		decode();
 	}
 	
 	private void decode() {
 		String[] uriParts = uri.split("/");
 		if(uriParts.length > 1) {
-			children = new String[uriParts.length - 1];
+			this.uriParts = new String[uriParts.length - 1];
 		}
 		for(int i = 0; i < uriParts.length; i++) {
 			if(i == 0) {
 				root = uriParts[i];
 			}else {
-				children[i-1] = uriParts[i];
+				this.uriParts[i-1] = uriParts[i];
 			}
-		}
+		} 
 	}
 
 	public String getRoot() {
@@ -31,12 +34,12 @@ public class URIDecoder {
 		this.root = root;
 	}
 
-	public String[] getChildren() {
-		return children;
+	public String[] getUriParts() {
+		return uriParts;
 	}
 
-	public void setChildren(String[] children) {
-		this.children = children;
+	public void setUriParts(String[] uriParts) {
+		this.uriParts = uriParts;
 	}
 	
 }

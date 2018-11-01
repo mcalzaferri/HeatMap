@@ -1,0 +1,37 @@
+{
+	"entities": [{
+		"name": "TestEntity",
+		"alias": "testentity",
+		"fields": [{
+			"name": "RequiredField1",
+            "type": "String",
+            "required": "true"
+		}],
+		"entities": [{
+			"name": "TestSubEntity",
+			"alias": "testsubentity",
+			"fields": [{
+					"name": "RequiredField1",
+                    "type": "Double",
+                    "required": "true"
+				},
+				{
+					"name": "RequiredField2",
+                    "type": "Timestamp",
+                    "required": "true"
+				},
+				{
+					"name": "RequiredField3",
+                    "type": "LatLng",
+                    "required": "true"
+				},
+				{
+				"name": "OptionalField",
+                    "type": "LatLng",
+                    "required": "false"
+				}
+			],
+			"entities": []
+		}]
+	}]
+}

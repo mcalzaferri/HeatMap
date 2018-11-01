@@ -1,0 +1,27 @@
+{
+	"entities": [{
+		"name": "TemperatureSensors",
+		"alias": "sensors",
+		"fields": [{
+			"name": "Location",
+            "type": "LatLng",
+            "required": "true"
+		}],
+		"entities": [{
+			"name": "TemperatureMeasurements",
+			"alias": "measurements",
+			"fields": [{
+					"name": "Temperature",
+                    "type": "Double",
+                    "required": "true"
+				},
+				{
+					"name": "Timestamp",
+                    "type": "Timestamp",
+                    "required": "true"
+				}
+			],
+			"entities": []
+		}]
+	}]
+}

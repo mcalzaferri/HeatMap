@@ -1,0 +1,8 @@
+{
+    "RequiredField1" : "test",
+    "REQUIREDFIELD2" : "test",
+    "requiredfield3" : {
+      	"latitude": "-33.865257570508334",
+      	"longitude": "151.19287000481452"
+   	}
+}

@@ -1,5 +1,6 @@
 package mcalzaferri.project.heatmap.servlet;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Date;
@@ -10,10 +11,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import mcalzaferri.geo.GeoLocation;
-import mcalzaferri.project.heatmap.common.entities.NotIdentifiedSensor;
-import mcalzaferri.project.heatmap.common.entities.TemperatureSensorData;
-import mcalzaferri.project.heatmap.data.SensorDataStore;
+import com.google.gson.JsonObject;
+
+import mcalzaferri.project.heatmap.data.HeatmapDatastore;
 
 @WebServlet(
 	    name = "Api",
@@ -26,15 +26,27 @@ public class ApiServlet extends HttpServlet{
 	 */
 	private static final long serialVersionUID = 4406189919961725742L;
 
-	private SensorDataStore dataStore;
+	private HeatmapDatastore datastore;
 	
-	public ApiServlet() {
-		dataStore = SensorDataStore.getDefaultInstance();
+	public ApiServlet() throws IOException {
+		datastore = HeatmapDatastore.getDefaultInstance("src/main/config/datastoreConfiguration");
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().write(request.getRequestURI().toString());
+		StringBuilder sb = new StringBuilder();
+		BufferedReader reader = request.getReader();
+		while(reader.ready()) {
+			sb.append(reader.readLine());
+		}
+		String requestContent = sb.toString();
+		sb = new StringBuilder();
+		try {
+			JsonObject createdJsonObject = datastore.storeJson(request.getRequestURI(), requestContent);
+			response.getWriter().write(createdJsonObject.toString());
+		}catch(Exception e) {
+			e.printStackTrace(response.getWriter());
+		}
 	}
 	
 	@Override

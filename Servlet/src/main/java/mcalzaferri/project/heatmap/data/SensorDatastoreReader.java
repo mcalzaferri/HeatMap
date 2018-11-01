@@ -2,12 +2,12 @@ package mcalzaferri.project.heatmap.data;
 
 import com.google.cloud.datastore.*;
 
-
-public class SensorDataStoreReader {
+@SuppressWarnings("all")
+public class SensorDatastoreReader {
 	private Datastore datastore;
-	private DataStoreKeyFactory keyFactory;
+	private DatastoreKeyFactory keyFactory;
 	
-	public SensorDataStoreReader(Datastore datastore, DataStoreKeyFactory keyFactory) {
+	public SensorDatastoreReader(Datastore datastore, DatastoreKeyFactory keyFactory) {
 		this.datastore = datastore;
 		this.keyFactory = keyFactory;
 	}
@@ -22,10 +22,6 @@ public class SensorDataStoreReader {
 		}
 	}
 	*/
-	public boolean containsSensor(long id) {
-		Entity sensor = datastore.get(keyFactory.getSensorKey(id));
-		return sensor != null;
-	}
 	/*
 	public List<TemperatureSensor> listSensors(){
 		Query<Entity> query = Query.newEntityQueryBuilder()

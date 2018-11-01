@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>Client</name>
+	<name>Common</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -20,10 +20,4 @@
 		<nature>org.eclipse.jdt.core.javanature</nature>
 		<nature>org.eclipse.buildship.core.gradleprojectnature</nature>
 	</natures>
-	<variableList>
-		<variable>
-			<name>copy_PARENT</name>
-			<value>$%7BPARENT-3-PROJECT_LOC%7D/git/HeatMap</value>
-		</variable>
-	</variableList>
 </projectDescription>
