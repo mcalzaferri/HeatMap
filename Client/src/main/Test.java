@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.util.Random;
 
 import mcalzaferri.geo.GeoLocation;
-import mcalzaferri.net.http.HttpPostClient;
 import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 
 /**
@@ -14,27 +13,24 @@ public class Test {
     	boolean runLocal = false;
     	boolean runOnThreads = false;
     	String host;
-    	HttpPostClient client;
     	
     	//initialization
     	if(runLocal) {
-    		host = "http://localhost:8080/api";
-    		client = new HttpPostClient(host);
+    		host = "http://localhost:8080/api/sensors";
     	}else {
     		host = "https://heatmap-219120.appspot.com/api/sensors";
-    		client = new HttpPostClient(host);
     	}
     	
     	//run
     	if(runOnThreads) {
         	for(int i = 0; i < 50; i++) {
-        		Thread t = new Thread(new RandomTemperatureSensorClient(client, createRandomGeoLocation()));
+        		Thread t = new Thread(new RandomTemperatureSensorClient(host, createRandomGeoLocation()));
         		
         		t.start();
         		Thread.sleep(100);
         	}
     	}else {
-    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(client, createRandomGeoLocation());
+    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(host, createRandomGeoLocation());
     		sensor.run();
     	}
 

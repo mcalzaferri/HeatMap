@@ -5,24 +5,17 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map.Entry;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import mcalzaferri.geo.GeoLocation;
-
-import com.google.gson.JsonElement;
 
 public class HttpPostClient{
 	private HttpURLConnection con; //Can be Https or Http as HttpsURLConnection simply extends HttpURLConnection
 	private URL url;
 	private int connectTimeout;
-	public HttpPostClient(String url) throws IOException {
-		this.url = new URL(url);
+	public HttpPostClient() throws IOException {
 		connectTimeout = 0;
 	}
 	public void connect() throws IOException {
@@ -33,6 +26,10 @@ public class HttpPostClient{
 		con.connect();
 	}
 	
+	public void setUrl(String url) throws MalformedURLException {
+		this.url = new URL(url);
+	}
+	
 	public void disconnect() {
 		con.disconnect();
 	}
@@ -41,16 +38,6 @@ public class HttpPostClient{
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		Gson gson = gsonBuilder.create();
 		String json = gson.toJson(data);
-		JsonObject jsonObj = new JsonParser().parse(json).getAsJsonObject();
-		for(Entry<String, JsonElement> entrie : jsonObj.entrySet()) {
-			System.out.println(entrie.getKey());
-		}
-		if(jsonObj.has("location")) {
-			GeoLocation location = new GeoLocation(jsonObj.get("location").getAsJsonObject().get("latitude").getAsDouble(), 
-					jsonObj.get("location").getAsJsonObject().get("longitude").getAsDouble());
-			System.out.println(location.toString());
-			System.out.println("yey");
-		}
 		return gson.fromJson(post(json), expectedResponseData);
 	}
 	

@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.security.SecureRandom;
 
 import mcalzaferri.geo.GeoLocation;
-import mcalzaferri.net.http.HttpPostClient;
 
 public class RandomTemperatureSensorClient extends TemperatureSensorClient{
 
-	public RandomTemperatureSensorClient(long defaultId, HttpPostClient client, GeoLocation location) throws IOException {
-		super(defaultId, client, location);
+	public RandomTemperatureSensorClient(long defaultId, String host, GeoLocation location) throws IOException {
+		super(defaultId, host, location);
 		// TODO Auto-generated constructor stub
 	}
 	
-	public RandomTemperatureSensorClient(HttpPostClient client, GeoLocation location) throws IOException {
-		super(client, location);
+	public RandomTemperatureSensorClient(String host, GeoLocation location) throws IOException {
+		super(host, location);
 	}
 	
 	public double getTemperature() {

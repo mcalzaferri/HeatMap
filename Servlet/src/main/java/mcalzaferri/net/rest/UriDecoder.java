@@ -22,6 +22,7 @@ public class UriDecoder {
 				root = uriParts[i];
 			}else {
 				this.uriParts[i-1] = uriParts[i];
+				
 			}
 		} 
 	}

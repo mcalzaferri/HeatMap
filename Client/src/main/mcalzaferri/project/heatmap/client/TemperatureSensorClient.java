@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.util.Date;
 
 import mcalzaferri.geo.GeoLocation;
-import mcalzaferri.net.http.HttpPostClient;
 import mcalzaferri.project.heatmap.common.entities.TemperatureSensorData;
 
 public abstract class TemperatureSensorClient extends SensorClient{
 
-	public TemperatureSensorClient(long defaultId, HttpPostClient client, GeoLocation location) throws IOException {
-		super(defaultId, client, location);
+	public TemperatureSensorClient(long defaultId, String host, GeoLocation location) throws IOException {
+		super(defaultId, host, location);
 	}
 	
-	public TemperatureSensorClient(HttpPostClient client, GeoLocation location) throws IOException {
-		super(client, location);
+	public TemperatureSensorClient(String host, GeoLocation location) throws IOException {
+		super(host, location);
 	}
 	
 	@Override

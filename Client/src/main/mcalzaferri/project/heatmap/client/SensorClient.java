@@ -11,20 +11,22 @@ import mcalzaferri.project.heatmap.common.entities.NotIdentifiedSensor;
 public abstract class SensorClient implements Runnable {
 	public static final int connectTimeout = 5000; // ms
 	private HttpPostClient client;
+	private String host;
 	private long id;
 	private boolean connected;
 	private GeoLocation location;
 	private int sendInterval; //ms
 
-	public SensorClient(long defaultId, HttpPostClient client, GeoLocation location) throws IOException {
-		this(client, location);
+	public SensorClient(long defaultId, String host, GeoLocation location) throws IOException {
+		this(host, location);
 		id = defaultId;
 		sendInterval = 1000;
 	}
 
-	public SensorClient(HttpPostClient client, GeoLocation location) throws IOException {
+	public SensorClient(String host, GeoLocation location) throws IOException {
 		this.setLocation(location);
-		this.client = client;
+		this.host = host;
+		this.client = new HttpPostClient();
 		client.setConnectTimeout(connectTimeout);
 		sendInterval = 1000;
 	}
@@ -44,6 +46,10 @@ public abstract class SensorClient implements Runnable {
 
 	protected void connect() {
 		try {
+			if(id == 0)
+				client.setUrl(host);
+			else
+				client.setUrl(host + "/" + id + "/measurements");
 			client.connect();
 			System.out.println("Successfully connected to server!");
 			connected = true;
@@ -71,6 +77,7 @@ public abstract class SensorClient implements Runnable {
 		IdentifiedSensor idSensor = post(noIdSensor, IdentifiedSensor.class);
 		if(idSensor != null) {
 			setId(idSensor.getId());
+			disconnect();
 		}
 	}
 

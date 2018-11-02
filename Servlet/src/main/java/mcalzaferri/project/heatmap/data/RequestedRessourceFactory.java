@@ -2,7 +2,6 @@ package mcalzaferri.project.heatmap.data;
 
 import mcalzaferri.net.rest.UriDecoder;
 
-
 public class RequestedRessourceFactory {
 	private String name;
 	private Long id;
@@ -10,8 +9,14 @@ public class RequestedRessourceFactory {
 	private RequestedRessource child;
 	
 	private RequestedRessourceFactory() {
+		init();
+	}
+	
+	private void init() {
 		name = null;
 		id = null;
+		parent = null;
+		child = null;
 	}
 	
 	public static RequestedRessourceFactory newFactory() {
@@ -53,6 +58,7 @@ public class RequestedRessourceFactory {
 		RequestedRessource result = new RequestedRessource(name, id);
 		result.setChild(child);
 		result.setParent(parent);
+		init();
 		return result;
 	}
 	

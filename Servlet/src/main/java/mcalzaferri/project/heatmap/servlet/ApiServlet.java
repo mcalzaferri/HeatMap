@@ -36,8 +36,6 @@ public class ApiServlet extends HttpServlet{
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		Logger logger = Logger.getLogger(ApiServlet.class.getName());
-		logger.log(Level.INFO, "Received new Message!");
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = request.getReader();
 		while(reader.ready()) {

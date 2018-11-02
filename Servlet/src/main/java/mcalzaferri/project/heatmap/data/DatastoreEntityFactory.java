@@ -24,11 +24,9 @@ public class DatastoreEntityFactory {
 	
 	public FullEntity<IncompleteKey> buildFromJsonObject(IncompleteKey key, EntityDefinition def, JsonObject jsonObject) {
 		FullEntity.Builder<IncompleteKey> builder = Entity.newBuilder(key);
-		builder.set("content", jsonObject.toString());
 		for(FieldDefinition field : def.fields) {
-			builder.set(field.name + "type", field.type);
-			builder.set(field.name + "value", jsonObject.get(field.name).toString());
 			if(jsonObject.has(field.name)) {
+				System.out.print("set " + field.name + "to: ");
 				switch(field.type) {
 				case "Double":
 					builder.set(field.name, jsonObject.get(field.name).getAsDouble());
