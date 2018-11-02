@@ -4,18 +4,18 @@ import java.util.Date;
 
 public class SensorData {
 
-	private long unixTimestamp;
+	private long timestamp;
 	
 	public SensorData(Date timestamp) {
 		setTimestamp(timestamp);
 	}
 
 	public Date getTimestamp() {
-		return new Date(unixTimestamp);
+		return new Date(timestamp);
 	}
 
 	public void setTimestamp(Date timestamp) {
-		this.unixTimestamp = timestamp.getTime();
+		this.timestamp = timestamp.getTime();
 	}
 	
 	

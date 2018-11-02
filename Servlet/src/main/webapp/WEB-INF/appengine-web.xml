@@ -7,6 +7,7 @@
     <include path="index.html"></include>
     <include path="bundle.js"></include>
     <include path="map.js"></include>
+    <include path="datastoreConfiguration.json"></include>
   </static-files>
   <sessions-enabled>false</sessions-enabled>
   <runtime>java8</runtime>

@@ -24,7 +24,10 @@ public class DatastoreEntityFactory {
 	
 	public FullEntity<IncompleteKey> buildFromJsonObject(IncompleteKey key, EntityDefinition def, JsonObject jsonObject) {
 		FullEntity.Builder<IncompleteKey> builder = Entity.newBuilder(key);
+		builder.set("content", jsonObject.toString());
 		for(FieldDefinition field : def.fields) {
+			builder.set(field.name + "type", field.type);
+			builder.set(field.name + "value", jsonObject.get(field.name).toString());
 			if(jsonObject.has(field.name)) {
 				switch(field.type) {
 				case "Double":
@@ -48,8 +51,8 @@ public class DatastoreEntityFactory {
 					builder.set(field.name, jsonObject.get(field.name).getAsString());
 					break;
 				}
+			}else {
 			}
-			
 		}
 		return builder.build();
 	}

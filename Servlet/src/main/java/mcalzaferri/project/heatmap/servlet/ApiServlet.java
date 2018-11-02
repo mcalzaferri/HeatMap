@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -29,11 +31,13 @@ public class ApiServlet extends HttpServlet{
 	private HeatmapDatastore datastore;
 	
 	public ApiServlet() throws IOException {
-		datastore = HeatmapDatastore.getDefaultInstance("src/main/config/datastoreConfiguration");
+		datastore = HeatmapDatastore.getDefaultInstance("datastoreConfiguration.json");
 	}
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Logger logger = Logger.getLogger(ApiServlet.class.getName());
+		logger.log(Level.INFO, "Received new Message!");
 		StringBuilder sb = new StringBuilder();
 		BufferedReader reader = request.getReader();
 		while(reader.ready()) {

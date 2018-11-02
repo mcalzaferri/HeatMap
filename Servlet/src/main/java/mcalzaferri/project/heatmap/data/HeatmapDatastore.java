@@ -7,12 +7,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import mcalzaferri.project.heatmap.data.config.DatastoreConfigReader;
+import mcalzaferri.project.heatmap.data.config.DatastoreConfigVerifier;
 import mcalzaferri.project.heatmap.data.config.RessourceNotFoundException;
+import mcalzaferri.project.heatmap.data.config.VerificationException;
 
 public class HeatmapDatastore{
 	private Datastore datastore;
 	private DatastoreKeyFactory keyFactory;
 	private DatastoreConfigReader configReader;
+	private DatastoreConfigVerifier configVerifier;
 	private SensorDatastoreReader datastoreReader;
 	private SensorDatastoreWriter datastoreWriter;
 	private DatastoreEntityFactory entityFactory;
@@ -44,13 +47,14 @@ public class HeatmapDatastore{
 	private HeatmapDatastore(DatastoreOptions options, String configPath) throws IOException {
 		datastore = options.getService();
 		configReader = new DatastoreConfigReader(configPath);
+		configVerifier = new DatastoreConfigVerifier(configReader);
 		entityFactory = DatastoreEntityFactory.newFactory();
 		keyFactory = DatastoreKeyFactory.newFactory(getDatastore());
 		datastoreWriter = new SensorDatastoreWriter(this);
 		resFactory = RequestedRessourceFactory.newFactory();
 	}
 	
-	public JsonObject storeJson(String uri, String json) throws RessourceNotFoundException {
+	public JsonObject storeJson(String uri, String json) throws RessourceNotFoundException, VerificationException {
 		JsonObject jsonObj = new JsonParser().parse(json).getAsJsonObject();
 		RequestedRessource res = resFactory.buildFromUri(uri);
 		long id = getWriter().storeJsonObject(res, jsonObj);
@@ -66,6 +70,9 @@ public class HeatmapDatastore{
 	}
 	public DatastoreConfigReader getConfigReader() {
 		return configReader;
+	}
+	public DatastoreConfigVerifier getConfigVerifier() {
+		return configVerifier;
 	}
 	public SensorDatastoreReader getReader() {
 		return datastoreReader;

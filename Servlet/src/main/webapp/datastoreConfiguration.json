@@ -3,7 +3,7 @@
 		"name": "TemperatureSensors",
 		"alias": "sensors",
 		"fields": [{
-			"name": "location",
+			"name": "Location",
             "type": "LatLng",
             "required": "true"
 		}],
@@ -11,12 +11,12 @@
 			"name": "TemperatureMeasurements",
 			"alias": "measurements",
 			"fields": [{
-					"name": "temperature",
+					"name": "Temperature",
                     "type": "Double",
                     "required": "true"
 				},
 				{
-					"name": "timestamp",
+					"name": "Timestamp",
                     "type": "Timestamp",
                     "required": "true"
 				}

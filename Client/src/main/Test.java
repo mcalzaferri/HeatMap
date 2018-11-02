@@ -11,17 +11,17 @@ import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 public class Test {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-    	boolean runLocal = true;
+    	boolean runLocal = false;
     	boolean runOnThreads = false;
     	String host;
     	HttpPostClient client;
     	
     	//initialization
     	if(runLocal) {
-    		host = "http://localhost:8080/datapool";
+    		host = "http://localhost:8080/api";
     		client = new HttpPostClient(host);
     	}else {
-    		host = "https://heatmap-219120.appspot.com/datapool";
+    		host = "https://heatmap-219120.appspot.com/api/sensors";
     		client = new HttpPostClient(host);
     	}
     	
