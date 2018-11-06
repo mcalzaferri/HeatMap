@@ -10,6 +10,8 @@ import java.net.URL;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public class HttpPostClient{
 	private HttpURLConnection con; //Can be Https or Http as HttpsURLConnection simply extends HttpURLConnection

@@ -10,7 +10,7 @@ import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 public class Test {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-    	boolean runLocal = false;
+    	boolean runLocal = true;
     	boolean runOnThreads = false;
     	String host;
     	

@@ -8,6 +8,7 @@ import com.google.gson.JsonParser;
 
 import mcalzaferri.project.heatmap.data.config.DatastoreConfigReader;
 import mcalzaferri.project.heatmap.data.config.DatastoreConfigVerifier;
+import mcalzaferri.project.heatmap.data.config.FieldNotFoundException;
 import mcalzaferri.project.heatmap.data.config.RessourceNotFoundException;
 import mcalzaferri.project.heatmap.data.config.VerificationException;
 
@@ -20,6 +21,8 @@ public class HeatmapDatastore{
 	private SensorDatastoreWriter datastoreWriter;
 	private DatastoreEntityFactory entityFactory;
 	private RequestedRessourceFactory resFactory;
+	private DatastoreQueryFactory queryFactory;
+	
 	private static HeatmapDatastore instance;
 	
 	public static HeatmapDatastore getLocalInstance(String configPath) throws IOException {
@@ -51,7 +54,14 @@ public class HeatmapDatastore{
 		entityFactory = DatastoreEntityFactory.newFactory();
 		keyFactory = DatastoreKeyFactory.newFactory(getDatastore());
 		datastoreWriter = new SensorDatastoreWriter(this);
+		datastoreReader = new SensorDatastoreReader(this);
 		resFactory = RequestedRessourceFactory.newFactory();
+		queryFactory = DatastoreQueryFactory.newFactory(keyFactory);
+	}
+	
+	public String getJson(String uri, String queryString) throws RessourceNotFoundException, FieldNotFoundException {
+		RequestedRessource res = resFactory.buildFromUri(uri);
+		return datastoreReader.query(res, queryString);
 	}
 	
 	public JsonObject storeJson(String uri, String json) throws RessourceNotFoundException, VerificationException {
@@ -82,5 +92,9 @@ public class HeatmapDatastore{
 	}
 	public DatastoreEntityFactory getEntityFactory() {
 		return entityFactory;
+	}
+	
+	public DatastoreQueryFactory getQueryFactory() {
+		return queryFactory;
 	}
 }

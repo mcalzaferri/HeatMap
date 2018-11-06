@@ -4,7 +4,7 @@
 		"alias": "testentity",
 		"fields": [{
 			"name": "RequiredField1",
-            "type": "String",
+            "type": "STRING",
             "required": "true"
 		}],
 		"entities": [{
@@ -12,22 +12,22 @@
 			"alias": "testsubentity",
 			"fields": [{
 					"name": "RequiredField1",
-                    "type": "Double",
+                    "type": "DOUBLE",
                     "required": "true"
 				},
 				{
 					"name": "RequiredField2",
-                    "type": "Timestamp",
+                    "type": "TIMESTAMP",
                     "required": "true"
 				},
 				{
 					"name": "RequiredField3",
-                    "type": "LatLng",
+                    "type": "LAT_LNG",
                     "required": "true"
 				},
 				{
 				"name": "OptionalField",
-                    "type": "LatLng",
+                    "type": "LAT_LNG",
                     "required": "false"
 				}
 			],

@@ -1,51 +1,77 @@
 package mcalzaferri.project.heatmap.data;
 
+import com.google.appengine.api.search.query.ExpressionParser.negation_return;
 import com.google.cloud.datastore.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import mcalzaferri.project.heatmap.data.config.EntityDefinition;
+import mcalzaferri.project.heatmap.data.config.FieldNotFoundException;
+import mcalzaferri.project.heatmap.data.config.RessourceNotFoundException;
 
 @SuppressWarnings("all")
 public class SensorDatastoreReader {
-	private Datastore datastore;
-	private DatastoreKeyFactory keyFactory;
+	private HeatmapDatastore datastore;
 	
-	public SensorDatastoreReader(Datastore datastore, DatastoreKeyFactory keyFactory) {
+	public SensorDatastoreReader(HeatmapDatastore datastore) {
 		this.datastore = datastore;
-		this.keyFactory = keyFactory;
 	}
 	
-	/*
-	public TemperatureSensor readSensor(long id) {
-		Entity sensor = datastore.get(keyFactory.getSensorKey(id));
-		if(sensor != null) {
-			return new TemperatureSensor(sensor);
-		}else {
-			throw new NoSuchElementException("No sensor with id " + id + " found");
-		}
-	}
-	*/
-	/*
-	public List<TemperatureSensor> listSensors(){
-		Query<Entity> query = Query.newEntityQueryBuilder()
-				.setKind(SensorDataStore.SENSOR)
-				.build();
-		QueryResults<Entity> resultList = datastore.run(query);
-		List<TemperatureSensor> sensorList = new ArrayList<>();
-		while(resultList.hasNext()) {
-			sensorList.add(new TemperatureSensor(resultList.next()));
-		}
-		return sensorList;
+	public String query(RequestedRessource res, String queryString) throws FieldNotFoundException, RessourceNotFoundException {
+		EntityDefinition requestedEntity = datastore.getConfigReader().getEntityDefinition(res);
+		QueryResults<Entity> queryResult = datastore.getDatastore().run(datastore.getQueryFactory()
+				.setRequestedRessource(res)
+				.setEntityDefinition(requestedEntity)
+				.setQueryString(queryString)
+				.build());
+		return queryResultToJson(queryResult);
 	}
 	
-	public List<TemperatureData> listSensorData(long sensorId){
-		Query<Entity> query = Query.newEntityQueryBuilder()
-				.setKind(SensorDataStore.SENSORDATA)
-				.setFilter(PropertyFilter.eq(TemperatureData.SENSORID, sensorId))
-				.build();
-		QueryResults<Entity> resultList = datastore.run(query);
-		List<TemperatureData> dataList = new ArrayList<>();
-		while(resultList.hasNext()) {
-			dataList.add(new TemperatureData(resultList.next()));
+	private String queryResultToJson(QueryResults<Entity> queryResult) {
+		JsonArray jsonArray = new JsonArray();
+		while(queryResult != null && queryResult.hasNext()) {
+			Entity entity = queryResult.next();
+			jsonArray.add(entityToJsonObject(entity));
 		}
-		return dataList;
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		//return jsonArray.toString();
+		return gson.toJson(jsonArray);
 	}
-	*/
+	
+	private JsonObject entityToJsonObject(Entity entity) {
+		JsonObject json = new JsonObject();
+		json.addProperty("id", entity.getKey().getId());
+		for(String property : entity.getNames()) {
+			Value v = entity.getValue(property);
+			switch(v.getType()) {
+			case BOOLEAN:
+				json.addProperty(property, entity.getBoolean(property));
+				break;
+			case STRING:
+				json.addProperty(property, entity.getString(property));
+				break;
+			case DOUBLE:
+				json.addProperty(property, entity.getDouble(property));
+				break;
+			case LONG:
+				json.addProperty(property, entity.getLong(property));
+				break;
+			case LAT_LNG:
+				Gson gson = new Gson();
+				json.add(property, gson.toJsonTree(entity.getLatLng(property)));
+				break;
+			case TIMESTAMP:
+				json.addProperty(property, entity.getTimestamp(property).toDate().getTime());
+				break;
+			default:
+				json.addProperty(property, entity.getValue(property).toString());
+				break;
+			}
+		}
+		return json;
+	}
 }

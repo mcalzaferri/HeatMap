@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.JsonObject;
 
+import mcalzaferri.net.rest.QueryStringDecoder;
 import mcalzaferri.project.heatmap.data.HeatmapDatastore;
 
 @WebServlet(
@@ -31,7 +32,7 @@ public class ApiServlet extends HttpServlet{
 	private HeatmapDatastore datastore;
 	
 	public ApiServlet() throws IOException {
-		datastore = HeatmapDatastore.getDefaultInstance("datastoreConfiguration.json");
+		datastore = HeatmapDatastore.getLocalInstance("datastoreConfiguration.json");
 	}
 	
 	@Override
@@ -53,24 +54,12 @@ public class ApiServlet extends HttpServlet{
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		/*
-		StringBuilder sb = new StringBuilder();
-		SecureRandom rm = new SecureRandom();
 		response.setContentType("text/plain");
 		try {
-			long sensorId = dataStore.getWriter().createSensor(new NotIdentifiedSensor(new GeoLocation(90 * rm.nextDouble(), 90*rm.nextDouble())));
-			sb.append("Created sensor: " + sensorId + "\r\n");
-			for(int i = 0; i < 10; i++) {
-				long dataId = dataStore.getWriter().storeSensorData(new TemperatureSensorData(rm.nextDouble()*30, new Date()), sensorId);
-				sb.append("Created data: " + dataId + "\r\n");
-			}
-			response.getWriter().write(sb.toString());
+			String json = datastore.getJson(request.getRequestURI(), request.getQueryString());
+			response.getWriter().write(json);
 		}catch(Exception e) {
 			e.printStackTrace(response.getWriter());
 		}
-		*/
-		
-		
-		response.getWriter().write("URI = " + request.getRequestURI().toString() + " Query = " + request.getQueryString());
 	}
 }
