@@ -22,7 +22,7 @@ public class DatastoreEntityFactory {
 		FullEntity.Builder<IncompleteKey> builder = Entity.newBuilder(key);
 		for(FieldDefinition field : def.fields) {
 			if(jsonObject.has(field.name)) {
-				builder.set(field.name, field.parse(jsonObject.get(field.name).getAsJsonObject()));
+				builder.set(field.name, field.parse(jsonObject.get(field.name)));
 			}
 		}
 		return builder.build();

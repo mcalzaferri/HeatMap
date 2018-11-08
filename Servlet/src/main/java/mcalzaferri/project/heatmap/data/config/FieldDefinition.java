@@ -4,7 +4,7 @@ import java.util.Date;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.datastore.*;
-import com.google.gson.JsonObject;
+import com.google.gson.JsonElement;
 
 public class FieldDefinition {
 	public String name;
@@ -29,21 +29,21 @@ public class FieldDefinition {
 			return StringValue.of(input);
 		}
 	}
-	public Value<?> parse(JsonObject jsonObject){
+	public Value<?> parse(JsonElement jsonElement){
 		switch(getValueType()) {
 		case DOUBLE:
-			return DoubleValue.of(jsonObject.getAsDouble());
+			return DoubleValue.of(jsonElement.getAsDouble());
 		case LONG:
-			return LongValue.of(jsonObject.getAsLong());
+			return LongValue.of(jsonElement.getAsLong());
 		case TIMESTAMP:
-			return TimestampValue.of(Timestamp.of(new Date(jsonObject.getAsLong())));
+			return TimestampValue.of(Timestamp.of(new Date(jsonElement.getAsLong())));
 		case LAT_LNG:
-			return LatLngValue.of(LatLng.of(jsonObject.get("latitude").getAsDouble()
-					,jsonObject.get("longitude").getAsDouble()));
+			return LatLngValue.of(LatLng.of(jsonElement.getAsJsonObject().get("latitude").getAsDouble()
+					,jsonElement.getAsJsonObject().get("longitude").getAsDouble()));
 		case BOOLEAN:
-			return BooleanValue.of(jsonObject.getAsBoolean());
+			return BooleanValue.of(jsonElement.getAsBoolean());
 		default:
-			return StringValue.of(jsonObject.getAsString());
+			return StringValue.of(jsonElement.getAsString());
 		}
 	}
 }

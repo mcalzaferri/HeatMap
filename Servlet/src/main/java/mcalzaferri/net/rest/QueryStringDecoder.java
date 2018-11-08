@@ -133,7 +133,7 @@ public class QueryStringDecoder {
 		}
 		public PropertyFilter getAsPropertyFilter(EntityDefinition entitiyDef) throws FieldNotFoundException {
 			for(FieldDefinition field : entitiyDef.fields) {
-				if(field.name == property) {
+				if(field.name.equals(property)) {
 					switch(filterOperation) {
 					case GT:
 						return PropertyFilter.gt(property, field.parse(value));
