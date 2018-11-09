@@ -21,7 +21,7 @@ public class SensorDatastoreReader {
 		this.datastore = datastore;
 	}
 	
-	public String query(RequestedRessource res, String queryString) throws FieldNotFoundException, RessourceNotFoundException {
+	public JsonArray query(RequestedRessource res, String queryString) throws FieldNotFoundException, RessourceNotFoundException {
 		EntityDefinition requestedEntity = datastore.getConfigReader().getEntityDefinition(res);
 		QueryResults<Entity> queryResult = datastore.getDatastore().run(datastore.getQueryFactory()
 				.setRequestedRessource(res)
@@ -31,15 +31,13 @@ public class SensorDatastoreReader {
 		return queryResultToJson(queryResult);
 	}
 	
-	private String queryResultToJson(QueryResults<Entity> queryResult) {
+	private JsonArray queryResultToJson(QueryResults<Entity> queryResult) {
 		JsonArray jsonArray = new JsonArray();
 		while(queryResult != null && queryResult.hasNext()) {
 			Entity entity = queryResult.next();
 			jsonArray.add(entityToJsonObject(entity));
 		}
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		//return jsonArray.toString();
-		return gson.toJson(jsonArray);
+		return jsonArray;
 	}
 	
 	private JsonObject entityToJsonObject(Entity entity) {

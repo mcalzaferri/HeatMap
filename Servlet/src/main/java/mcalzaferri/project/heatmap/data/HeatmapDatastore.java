@@ -3,6 +3,7 @@ package mcalzaferri.project.heatmap.data;
 import java.io.IOException;
 
 import com.google.cloud.datastore.*;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -59,7 +60,7 @@ public class HeatmapDatastore{
 		queryFactory = DatastoreQueryFactory.newFactory(keyFactory);
 	}
 	
-	public String getJson(String uri, String queryString) throws RessourceNotFoundException, FieldNotFoundException {
+	public JsonArray getJson(String uri, String queryString) throws RessourceNotFoundException, FieldNotFoundException {
 		RequestedRessource res = resFactory.buildFromUri(uri);
 		return datastoreReader.query(res, queryString);
 	}

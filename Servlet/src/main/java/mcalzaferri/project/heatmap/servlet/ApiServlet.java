@@ -13,8 +13,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import mcalzaferri.json.JsonToCsvConverter;
 import mcalzaferri.net.rest.QueryStringDecoder;
 import mcalzaferri.project.heatmap.data.HeatmapDatastore;
 
@@ -32,7 +37,7 @@ public class ApiServlet extends HttpServlet{
 	private HeatmapDatastore datastore;
 	
 	public ApiServlet() throws IOException {
-		datastore = HeatmapDatastore.getLocalInstance("datastoreConfiguration.json");
+		datastore = HeatmapDatastore.getDefaultInstance("datastoreConfiguration.json");
 	}
 	
 	@Override
@@ -54,12 +59,41 @@ public class ApiServlet extends HttpServlet{
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.setContentType("text/plain");
+		String responseString;
 		try {
-			String json = datastore.getJson(request.getRequestURI(), request.getQueryString());
-			response.getWriter().write(json);
+			if(request.getRequestURI().contains(".")) {
+				String requestedRes = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1);
+				response.setHeader("Content-disposition","attachment; filename="+ requestedRes);
+			}
+			if(request.getRequestURI().endsWith(".csv")) {
+				responseString = doGetAsCsv(request, response);
+			}else {
+				responseString = doGetAsJson(request, response);
+			}
+			response.getWriter().write(responseString);
 		}catch(Exception e) {
 			e.printStackTrace(response.getWriter());
+		}
+		
+	}
+	
+	private String doGetAsJson(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		response.setContentType ("application/json");
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(datastore.getJson(getRessourceURI(request), request.getQueryString()));
+	}
+	
+	private String doGetAsCsv(HttpServletRequest request, HttpServletResponse response) throws Exception{
+		response.setContentType ("text/csv");
+		JsonToCsvConverter csvConverter = new JsonToCsvConverter();
+		return csvConverter.toCsv(datastore.getJson(getRessourceURI(request), request.getQueryString()));
+	}
+	
+	private String getRessourceURI(HttpServletRequest request) {
+		if(request.getRequestURI().contains(".")) {
+			return request.getRequestURI().substring(0, request.getRequestURI().lastIndexOf("."));
+		}else {
+			return request.getRequestURI();
 		}
 	}
 }
