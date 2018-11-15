@@ -5,9 +5,9 @@ import {terser} from 'rollup-plugin-terser';
 const production = !process.env.ROLLUP_WATCH;
 
 export default {
-  input: 'map.js',
+  input: 'leaflet.js',
   output: [
-    {file: 'bundle.js', format: 'iife'}
+    {file: 'leafletbundle.js', format: 'iife'}
   ],
   plugins: [
     node(),

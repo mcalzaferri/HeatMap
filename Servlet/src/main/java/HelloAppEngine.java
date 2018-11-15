@@ -23,7 +23,7 @@ public class HelloAppEngine extends HttpServlet {
 	  response.setContentType("text/html");
 	  response.setCharacterEncoding("UTF-8");
 	  
-	  BufferedReader reader = new BufferedReader(new FileReader("test.html"));
+	  BufferedReader reader = new BufferedReader(new FileReader("index.html"));
 	  PrintWriter out = response.getWriter();
 	  char[] buf = new char[4 * 1024]; // 4Kchar buffer
       int len;

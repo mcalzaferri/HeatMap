@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.appengine.api.search.StatusCode;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -40,9 +41,18 @@ public class ApiServlet extends HttpServlet{
 		datastore = HeatmapDatastore.getDefaultInstance("datastoreConfiguration.json");
 	}
 	
+	  //for Preflight
+	/*
+	  @Override
+	  protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	      setAccessControlHeaders(resp);
+	  }
+	  */
+	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		StringBuilder sb = new StringBuilder();
+		setAccessControlHeaders(response);
 		BufferedReader reader = request.getReader();
 		while(reader.ready()) {
 			sb.append(reader.readLine());
@@ -60,6 +70,7 @@ public class ApiServlet extends HttpServlet{
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String responseString;
+		setAccessControlHeaders(response);
 		try {
 			if(request.getRequestURI().contains(".")) {
 				String requestedRes = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1);
@@ -74,7 +85,6 @@ public class ApiServlet extends HttpServlet{
 		}catch(Exception e) {
 			e.printStackTrace(response.getWriter());
 		}
-		
 	}
 	
 	private String doGetAsJson(HttpServletRequest request, HttpServletResponse response) throws Exception{
@@ -96,4 +106,12 @@ public class ApiServlet extends HttpServlet{
 			return request.getRequestURI();
 		}
 	}
+	
+	  private void setAccessControlHeaders(HttpServletResponse resp) {
+	      resp.setHeader("Access-Control-Allow-Origin", "*");
+	      resp.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD");
+	      resp.setHeader("Access-Control-Allow-Credentials", "true");
+	      resp.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
+	      resp.setStatus(HttpServletResponse.SC_OK);
+	  }
 }
