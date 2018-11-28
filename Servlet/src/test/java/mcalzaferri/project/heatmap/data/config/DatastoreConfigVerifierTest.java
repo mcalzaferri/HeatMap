@@ -18,8 +18,9 @@ public class DatastoreConfigVerifierTest {
 	
 	@Before
 	public void initTest() throws IOException {
-		DatastoreConfigReader reader = new DatastoreConfigReader(rootPath + "TestConfiguration.json");
-		this.verifier = new DatastoreConfigVerifier(reader);
+		DatastoreConfigReader.initInstance(rootPath + "TestConfiguration.json");
+		DatastoreConfigReader reader = DatastoreConfigReader.getInstance();
+		this.verifier = DatastoreConfigVerifier.getInstance(reader);
 		testEntityRes = new RequestedRessource("testentity", null);
 		testSubEntityRes = new RequestedRessource("testentity", null);
 		testSubEntityRes.setChild(new RequestedRessource("testsubentity", null));

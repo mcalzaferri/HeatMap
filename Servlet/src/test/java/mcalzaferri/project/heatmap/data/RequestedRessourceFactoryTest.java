@@ -15,7 +15,7 @@ public class RequestedRessourceFactoryTest {
 	
 	@Test
 	public void validUriWithoutIdShouldBeCorrectlyResolved() {
-		RequestedRessource ressource = RequestedRessourceFactory.newFactory().buildFromUri(uriWithoutId);
+		RequestedRessource ressource = RequestedRessourceFactory.getInstance().newBuilder().buildFromUri(uriWithoutId);
 		assertRessourceEquals(ressource, subResName, null, true, false);
 		ressource = ressource.getParent();
 		assertRessourceEquals(ressource, resName, resId, false, true);
@@ -23,7 +23,7 @@ public class RequestedRessourceFactoryTest {
 	
 	@Test
 	public void validUriWithIdShouldBeCorrectlyResolved() {
-		RequestedRessource ressource = RequestedRessourceFactory.newFactory().buildFromUri(uriWithId);
+		RequestedRessource ressource = RequestedRessourceFactory.getInstance().newBuilder().buildFromUri(uriWithId);
 		assertRessourceEquals(ressource, subResName, subResId, true, false);
 		ressource = ressource.getParent();
 		assertRessourceEquals(ressource, resName, resId, false, true);
@@ -31,7 +31,7 @@ public class RequestedRessourceFactoryTest {
 	
 	@Test(expected = NumberFormatException.class)
 	public void nameInsteadOfIdInUriShouldThrowNumberFormatException() {
-		RequestedRessourceFactory.newFactory().buildFromUri("/root/res/subresinsteadofId");
+		RequestedRessourceFactory.getInstance().newBuilder().buildFromUri("/root/res/subresinsteadofId");
 	}
 	
 	private void assertRessourceEquals(RequestedRessource res, String name, Long id, boolean hasParent, boolean hasChild) {

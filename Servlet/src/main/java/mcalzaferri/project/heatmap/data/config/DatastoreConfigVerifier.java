@@ -9,10 +9,19 @@ import com.google.gson.JsonParser;
 import mcalzaferri.project.heatmap.data.RequestedRessource;
 
 public class DatastoreConfigVerifier {
-	private DatastoreConfigReader configReader;
 	
-	public DatastoreConfigVerifier(DatastoreConfigReader configReader) {
+	private DatastoreConfigReader configReader;
+	private static DatastoreConfigVerifier instance;
+	
+	private DatastoreConfigVerifier(DatastoreConfigReader configReader) {
 		this.configReader = configReader;
+	}
+	
+	public static DatastoreConfigVerifier getInstance(DatastoreConfigReader configReader) {
+		if(instance == null) {
+			instance = new DatastoreConfigVerifier(configReader);
+		}
+		return instance;
 	}
 	
 	public void verifyJson(RequestedRessource requestedRessource, String json) throws VerificationException, RessourceNotFoundException {
@@ -31,7 +40,11 @@ public class DatastoreConfigVerifier {
 		if(jsonObj == null || def == null) {
 			throw new NullPointerException();
 		}
-		//First check if json does not contain more data then required
+		verifyIfJsonContainsNotTooManyFields(def, jsonObj);
+		verifyIfJsonContainsAllRequiredFields(def, jsonObj);
+	}
+	
+	public void verifyIfJsonContainsNotTooManyFields(EntityDefinition def, JsonObject jsonObj) throws TooManyFieldsException {
 		boolean found;
 		for(Entry<String, JsonElement> entry : jsonObj.entrySet()) {
 			found = false;
@@ -42,7 +55,10 @@ public class DatastoreConfigVerifier {
 				throw new TooManyFieldsException("The field " + entry.getKey() + " of the json is too much and could not been found in the configuration");
 			}
 		}
-		//Now check if json contains all required data
+	}
+	
+	public void verifyIfJsonContainsAllRequiredFields(EntityDefinition def, JsonObject jsonObj) throws FieldNotFoundException {
+		boolean found;
 		for(FieldDefinition field : def.fields) {
 			if(field.required) {
 				found = false;

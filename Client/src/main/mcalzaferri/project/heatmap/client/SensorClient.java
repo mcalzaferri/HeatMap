@@ -3,39 +3,44 @@ package mcalzaferri.project.heatmap.client;
 import java.io.IOException;
 import java.net.ConnectException;
 
-import mcalzaferri.geo.GeoLocation;
+import mcalzaferri.geo.CapitalManager;
+import mcalzaferri.geo.CountryCapital;
+import mcalzaferri.geo.IdentifiedCountryCapital;
 import mcalzaferri.net.http.HttpPostClient;
 import mcalzaferri.project.heatmap.common.entities.IdentifiedSensor;
 import mcalzaferri.project.heatmap.common.entities.NotIdentifiedSensor;
 
 public abstract class SensorClient implements Runnable {
+	public static final int maxCount = 1;
 	public static final int connectTimeout = 5000; // ms
 	private HttpPostClient client;
 	private String host;
 	private long id;
+	private long count;
 	private boolean connected;
-	private GeoLocation location;
+	private CountryCapital capital;
+	private CapitalManager manager;
 	private int sendInterval; //ms
 
-	public SensorClient(long defaultId, String host, GeoLocation location) throws IOException {
-		this(host, location);
-		id = defaultId;
-		sendInterval = 1000;
-	}
-
-	public SensorClient(String host, GeoLocation location) throws IOException {
-		this.setLocation(location);
+	public SensorClient(String host, CapitalManager manager) throws IOException {
+		this.manager = manager;
+		this.capital = manager.getNextCapital();
 		this.host = host;
 		this.client = new HttpPostClient();
+		this.count = 0;
 		client.setConnectTimeout(connectTimeout);
+		if(capital instanceof IdentifiedCountryCapital) {
+			id = ((IdentifiedCountryCapital)capital).getId();
+		}
+		
 		sendInterval = 1000;
 	}
 
 	@Override
 	public void run() {
-		while (true) {
+		while (count < maxCount) {
 			connect();
-			while (connected) {
+			while (connected && count < maxCount) {
 				updateServer();
 				sleep(sendInterval);
 			}
@@ -69,11 +74,12 @@ public abstract class SensorClient implements Runnable {
 			requestId();
 		} else {
 			sendData();
+			count++;
 		}
 	}
 	
 	protected void requestId() {
-		NotIdentifiedSensor noIdSensor = new NotIdentifiedSensor(getLocation());
+		NotIdentifiedSensor noIdSensor = new NotIdentifiedSensor(capital.getLocation());
 		IdentifiedSensor idSensor = post(noIdSensor, IdentifiedSensor.class);
 		if(idSensor != null) {
 			setId(idSensor.getId());
@@ -108,14 +114,6 @@ public abstract class SensorClient implements Runnable {
 			e.printStackTrace();
 		}
 	}
-
-	public GeoLocation getLocation() {
-		return location;
-	}
-
-	public void setLocation(GeoLocation location) {
-		this.location = location;
-	}
 	
 	public int getSendInterval() {
 		return sendInterval;
@@ -135,5 +133,6 @@ public abstract class SensorClient implements Runnable {
 
 	public void setId(long id) {
 		this.id = id;
+		manager.identifyCapital(capital, id);
 	}
 }

@@ -8,13 +8,17 @@ import com.google.cloud.datastore.PathElement;
 
 public class DatastoreKeyFactory {
 	private Datastore datastore;
+	private static DatastoreKeyFactory instance;
 	
 	private DatastoreKeyFactory(Datastore datastore) {
 		this.datastore = datastore;
 	}
 	
-	public static DatastoreKeyFactory newFactory(Datastore datastore) {
-		return new DatastoreKeyFactory(datastore);
+	public static DatastoreKeyFactory getInstance(Datastore datastore) {
+		if(instance == null) {
+			instance = new DatastoreKeyFactory(datastore);
+		}
+		return instance;
 	}
 	
 	public IncompleteKey createRessourceKey(RequestedRessource res) {

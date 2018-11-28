@@ -3,17 +3,12 @@ package mcalzaferri.project.heatmap.client;
 import java.io.IOException;
 import java.security.SecureRandom;
 
-import mcalzaferri.geo.GeoLocation;
+import mcalzaferri.geo.CapitalManager;
 
 public class RandomTemperatureSensorClient extends TemperatureSensorClient{
 
-	public RandomTemperatureSensorClient(long defaultId, String host, GeoLocation location) throws IOException {
-		super(defaultId, host, location);
-		// TODO Auto-generated constructor stub
-	}
-	
-	public RandomTemperatureSensorClient(String host, GeoLocation location) throws IOException {
-		super(host, location);
+	public RandomTemperatureSensorClient(String host, CapitalManager manager) throws IOException {
+		super(host, manager);
 	}
 	
 	public double getTemperature() {

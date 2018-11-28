@@ -1,4 +1,5 @@
 var mymap = L.map('mapid').setView([51.505, -0.09], 3);
+var apiUrl = "https://heatmap-219120.appspot.com/api";
 
 window.onload = addMarkersToMap();
 
@@ -62,14 +63,15 @@ function calculateMinZoom(newSize) {
 function panToCenter() {
     if(mymap.getBounds().getEast() > 300 || mymap.getBounds().getWest() < -300){
         mymap.panInsideBounds([
-            [-90, -300],
-            [90, 300]
+            [-90, -190],
+            [90, 190]
         ], animate = true);
     }
 }
 
 function addMarkersToMap() {
-    $.get("https://heatmap-219120.appspot.com/api/sensors", function (data, status) {
+    var sensorUrl = apiUrl + "/sensors"
+    $.get(sensorUrl, function (data, status) {
         for (var i = 0; i < data.length; i++) {
             var marker = L.marker([data[i].location.latitude, data[i].location.longitude]).addTo(mymap);
             marker.bindPopup();
@@ -78,6 +80,8 @@ function addMarkersToMap() {
             function onMarkerClick(e) {
                 var popup = e.target.getPopup();
                 var chartId = "chart" + e.target.id;
+                var jsonExportUrl = sensorUrl + "/" + e.target.id + "/measurements.json?orderBy=+timestamp";
+                var csvExportUrl = sensorUrl + "/" + e.target.id + "/measurements.csv?orderBy=+timestamp";
                 popup.setContent(
                     '<canvas id="' + chartId + '" width="400" height="400"><p>ERROR: Could not load data!</p></canvas>' +
                     '<section style="display: table; clear: both; width: 70%;">' +
@@ -95,7 +99,9 @@ function addMarkersToMap() {
                     '       <p id="avgday'+ e.target.id +'">No data available</p>' +
                     '       <p id="avghour'+ e.target.id +'">No data available</p>' +
                     '   </values>' +
-                    '</section>'
+                    '</section>' +
+                    '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
+                    '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>'
                 );
                 drawChartAndAverage(document.getElementById(chartId), e.target.id);
             }
@@ -104,7 +110,7 @@ function addMarkersToMap() {
 }
 
 function drawChartAndAverage(ctx, sensorId) {
-    var url = "https://heatmap-219120.appspot.com/api/sensors/" + sensorId + "/measurements?orderBy=+timestamp";
+    var url = apiUrl + "/sensors/" + sensorId + "/measurements?orderBy=+timestamp";
     var measurements = [];
     $.get(url, function (data, status) {
         var avgday = { value: 0.0, count: 0 };
@@ -154,7 +160,7 @@ function drawAverages(data, sensorId){
             if (now.getUTCMonth() == date.getUTCMonth()) {
                 avgmonth.value += data[i].temperature;
                 avgmonth.count++;
-                if (now.getUTCDate() - date.getUTCDate() < 7 && now.getUTCDay() > date.getUTCDate()) {
+                if (now.getUTCDate() - date.getUTCDate() < 7 && now.getUTCDay() >= date.getUTCDay()) {
                     avgweek.value += data[i].temperature;
                     avgweek.count++;
                     if (now.getUTCDate() == date.getUTCDate()) {

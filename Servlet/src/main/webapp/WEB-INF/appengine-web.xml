@@ -3,10 +3,9 @@
 
   <threadsafe>true</threadsafe>
   <static-files>
-    <include path="map.html"></include>
+    <include path="leafletmapjs.html"></include>
     <include path="index.html"></include>
-    <include path="bundle.js"></include>
-    <include path="map.js"></include>
+    <include path="leaflet.js"></include>
     <include path="datastoreConfiguration.json"></include>
   </static-files>
   <sessions-enabled>false</sessions-enabled>

@@ -10,12 +10,15 @@ import mcalzaferri.project.heatmap.data.config.FieldDefinition;
 
 public class DatastoreEntityFactory {
 	
-	private DatastoreEntityFactory() {
-		
-	}
+	private static DatastoreEntityFactory instance;
 	
-	public static DatastoreEntityFactory newFactory() {
-		return new DatastoreEntityFactory();
+	private DatastoreEntityFactory() {}
+	
+	public static DatastoreEntityFactory getInstance() {
+		if(instance == null) {
+			instance = new DatastoreEntityFactory();
+		}
+		return instance;
 	}
 	
 	public FullEntity<IncompleteKey> buildFromJsonObject(IncompleteKey key, EntityDefinition def, JsonObject jsonObject) {

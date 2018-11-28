@@ -22,7 +22,10 @@ import com.google.gson.JsonObject;
 
 import mcalzaferri.json.JsonToCsvConverter;
 import mcalzaferri.net.rest.QueryStringDecoder;
-import mcalzaferri.project.heatmap.data.HeatmapDatastore;
+import mcalzaferri.project.heatmap.data.HeatmapDatastoreToolkit;
+import mcalzaferri.project.heatmap.data.config.FieldNotFoundException;
+import mcalzaferri.project.heatmap.data.config.RessourceNotFoundException;
+import mcalzaferri.project.heatmap.data.config.VerificationException;
 
 @WebServlet(
 	    name = "Api",
@@ -35,68 +38,79 @@ public class ApiServlet extends HttpServlet{
 	 */
 	private static final long serialVersionUID = 4406189919961725742L;
 
-	private HeatmapDatastore datastore;
+	private HeatmapDatastoreToolkit datastoreToolkit;
 	
 	public ApiServlet() throws IOException {
-		datastore = HeatmapDatastore.getDefaultInstance("datastoreConfiguration.json");
+		datastoreToolkit = HeatmapDatastoreToolkit.getDefaultInstance("datastoreConfiguration.json");
 	}
-	
-	  //for Preflight
-	/*
-	  @Override
-	  protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-	      setAccessControlHeaders(resp);
-	  }
-	  */
 	
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		StringBuilder sb = new StringBuilder();
 		setAccessControlHeaders(response);
-		BufferedReader reader = request.getReader();
-		while(reader.ready()) {
-			sb.append(reader.readLine());
-		}
-		String requestContent = sb.toString();
-		sb = new StringBuilder();
+		String requestContent = getRequestContent(request);
 		try {
-			JsonObject createdJsonObject = datastore.storeJson(request.getRequestURI(), requestContent);
-			response.getWriter().write(createdJsonObject.toString());
-		}catch(Exception e) {
-			e.printStackTrace(response.getWriter());
+			JsonObject createdJsonObject = datastoreToolkit.storeJson(request.getRequestURI(), requestContent);
+			setResponseContent(response, createdJsonObject.toString(), HttpServletResponse.SC_OK);
+		}catch(RessourceNotFoundException rnfe) {
+			setResponseContent(response, rnfe.getMessage(), HttpServletResponse.SC_NOT_FOUND);
+		} catch (VerificationException ve) {
+			setResponseContent(response, ve.getMessage(), HttpServletResponse.SC_FORBIDDEN);
 		}
 	}
 	
 	@Override
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String responseString;
 		setAccessControlHeaders(response);
 		try {
-			if(request.getRequestURI().contains(".")) {
-				String requestedRes = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1);
-				response.setHeader("Content-disposition","attachment; filename="+ requestedRes);
-			}
-			if(request.getRequestURI().endsWith(".csv")) {
-				responseString = doGetAsCsv(request, response);
-			}else {
-				responseString = doGetAsJson(request, response);
-			}
-			response.getWriter().write(responseString);
-		}catch(Exception e) {
-			e.printStackTrace(response.getWriter());
+			String responseString = getResponseContent(request, response);
+			setResponseContent(response, responseString, HttpServletResponse.SC_OK);
+		}catch(FieldNotFoundException fnfe) {
+			setResponseContent(response, fnfe.getMessage(), HttpServletResponse.SC_BAD_REQUEST);
+		} catch (RessourceNotFoundException rnfe) {
+			setResponseContent(response, rnfe.getMessage(), HttpServletResponse.SC_NOT_FOUND);
 		}
 	}
 	
-	private String doGetAsJson(HttpServletRequest request, HttpServletResponse response) throws Exception{
-		response.setContentType ("application/json");
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		return gson.toJson(datastore.getJson(getRessourceURI(request), request.getQueryString()));
+	private String getRequestContent(HttpServletRequest request) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		BufferedReader reader = request.getReader();
+		while(reader.ready()) {
+			sb.append(reader.readLine());
+		}
+		return sb.toString();
 	}
 	
-	private String doGetAsCsv(HttpServletRequest request, HttpServletResponse response) throws Exception{
+	private String getResponseContent(HttpServletRequest request, HttpServletResponse response) throws FieldNotFoundException, RessourceNotFoundException {
+		if(request.getRequestURI().contains(".")) {
+			setAttachmentHeaders(request, response);
+		}
+		if(request.getRequestURI().endsWith(".csv")) {
+			return doGetAsCsv(request, response);
+		}else {
+			return doGetAsJson(request, response);
+		}
+	}
+	
+	private void setResponseContent(HttpServletResponse response, String content, int status) throws IOException {
+		response.setStatus(status);
+		response.getWriter().write(content);
+	}
+	
+	private void setAttachmentHeaders(HttpServletRequest request, HttpServletResponse response) {
+		String requestedRes = request.getRequestURI().substring(request.getRequestURI().lastIndexOf("/") + 1);
+		response.setHeader("Content-disposition","attachment; filename="+ requestedRes);
+	}
+	
+	private String doGetAsJson(HttpServletRequest request, HttpServletResponse response) throws FieldNotFoundException, RessourceNotFoundException{
+		response.setContentType ("application/json");
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		return gson.toJson(datastoreToolkit.getJson(getRessourceURI(request), request.getQueryString()));
+	}
+	
+	private String doGetAsCsv(HttpServletRequest request, HttpServletResponse response) throws FieldNotFoundException, RessourceNotFoundException{
 		response.setContentType ("text/csv");
 		JsonToCsvConverter csvConverter = new JsonToCsvConverter();
-		return csvConverter.toCsv(datastore.getJson(getRessourceURI(request), request.getQueryString()));
+		return csvConverter.toCsv(datastoreToolkit.getJson(getRessourceURI(request), request.getQueryString()));
 	}
 	
 	private String getRessourceURI(HttpServletRequest request) {
@@ -107,11 +121,10 @@ public class ApiServlet extends HttpServlet{
 		}
 	}
 	
-	  private void setAccessControlHeaders(HttpServletResponse resp) {
-	      resp.setHeader("Access-Control-Allow-Origin", "*");
-	      resp.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD");
-	      resp.setHeader("Access-Control-Allow-Credentials", "true");
-	      resp.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
-	      resp.setStatus(HttpServletResponse.SC_OK);
-	  }
+	private void setAccessControlHeaders(HttpServletResponse resp) {
+		resp.setHeader("Access-Control-Allow-Origin", "*");
+		resp.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS, HEAD");
+		resp.setHeader("Access-Control-Allow-Credentials", "true");
+		resp.setHeader("Access-Control-Allow-Headers", "Content-Type, Accept, X-Requested-With");
+	}
 }

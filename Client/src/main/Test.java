@@ -1,7 +1,6 @@
 import java.io.IOException;
-import java.util.Random;
 
-import mcalzaferri.geo.GeoLocation;
+import mcalzaferri.geo.CapitalManager;
 import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
 
 /**
@@ -23,21 +22,16 @@ public class Test {
     	
     	//run
     	if(runOnThreads) {
-        	for(int i = 0; i < 50; i++) {
-        		Thread t = new Thread(new RandomTemperatureSensorClient(host, createRandomGeoLocation()));
+        	for(int i = 0; i < 10; i++) {
+        		Thread t = new Thread(new RandomTemperatureSensorClient(host, CapitalManager.getInstance()));
         		
         		t.start();
         		Thread.sleep(100);
         	}
     	}else {
-    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(host, createRandomGeoLocation());
+    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(host, CapitalManager.getInstance());
     		sensor.run();
     	}
 
     }
-private static GeoLocation createRandomGeoLocation(){
-    Random rm = new Random();
-    return new GeoLocation(90.0 - rm.nextDouble() * 180.0,180.0 - rm.nextDouble() * 360.0);
-}
-
 }

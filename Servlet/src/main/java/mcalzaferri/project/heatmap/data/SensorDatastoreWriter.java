@@ -10,9 +10,17 @@ import mcalzaferri.project.heatmap.data.config.RessourceNotFoundException;
 import mcalzaferri.project.heatmap.data.config.VerificationException;
 
 public class SensorDatastoreWriter {
-	private HeatmapDatastore datastore;
+	private HeatmapDatastoreToolkit datastore;
+	private static SensorDatastoreWriter instance;
 	
-	public SensorDatastoreWriter(HeatmapDatastore datastore) {
+	public static SensorDatastoreWriter getInstance(HeatmapDatastoreToolkit datastore) {
+		if(instance == null) {
+			instance = new SensorDatastoreWriter(datastore);
+		}
+		return instance;
+	}
+	
+	private SensorDatastoreWriter(HeatmapDatastoreToolkit datastore) {
 		this.datastore = datastore;
 	}
 	
