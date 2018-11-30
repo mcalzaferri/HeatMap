@@ -5,14 +5,16 @@ import java.net.ConnectException;
 
 import mcalzaferri.geo.CapitalManager;
 import mcalzaferri.geo.CountryCapital;
+import mcalzaferri.geo.GeoLocation;
 import mcalzaferri.geo.IdentifiedCountryCapital;
 import mcalzaferri.net.http.HttpPostClient;
 import mcalzaferri.project.heatmap.common.entities.IdentifiedSensor;
 import mcalzaferri.project.heatmap.common.entities.NotIdentifiedSensor;
 
 public abstract class SensorClient implements Runnable {
-	public static final int maxCount = 1;
+	public static final int maxCount = 100;
 	public static final int connectTimeout = 5000; // ms
+	public static final int sendInterval = 100; //ms
 	private HttpPostClient client;
 	private String host;
 	private long id;
@@ -20,7 +22,7 @@ public abstract class SensorClient implements Runnable {
 	private boolean connected;
 	private CountryCapital capital;
 	private CapitalManager manager;
-	private int sendInterval; //ms
+	
 
 	public SensorClient(String host, CapitalManager manager) throws IOException {
 		this.manager = manager;
@@ -32,8 +34,6 @@ public abstract class SensorClient implements Runnable {
 		if(capital instanceof IdentifiedCountryCapital) {
 			id = ((IdentifiedCountryCapital)capital).getId();
 		}
-		
-		sendInterval = 1000;
 	}
 
 	@Override
@@ -88,7 +88,7 @@ public abstract class SensorClient implements Runnable {
 	}
 
 	protected void sendData() {
-		Object data = getSensorData();
+		Object data = getSensorData(getLocation());
 		post(data,Object.class);
 	}
 
@@ -105,7 +105,7 @@ public abstract class SensorClient implements Runnable {
 		return null;
 	}
 
-	protected abstract Object getSensorData();
+	protected abstract Object getSensorData(GeoLocation location);
 
 	private void sleep(long millis) {
 		try {
@@ -119,10 +119,6 @@ public abstract class SensorClient implements Runnable {
 		return sendInterval;
 	}
 	
-	public void setSendInterval(int interval) {
-		this.sendInterval = interval;
-	}
-	
 	public HttpPostClient getClient() {
 		return client;
 	}
@@ -134,5 +130,9 @@ public abstract class SensorClient implements Runnable {
 	public void setId(long id) {
 		this.id = id;
 		manager.identifyCapital(capital, id);
+	}
+	
+	public GeoLocation getLocation() {
+		return capital.getLocation();
 	}
 }

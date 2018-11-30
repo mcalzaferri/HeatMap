@@ -1,7 +1,7 @@
 import java.io.IOException;
 
 import mcalzaferri.geo.CapitalManager;
-import mcalzaferri.project.heatmap.client.RandomTemperatureSensorClient;
+import mcalzaferri.project.heatmap.client.SimulatedTemperatureSensorClient;
 
 /**
  * Test
@@ -10,7 +10,7 @@ public class Test {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
     	boolean runLocal = false;
-    	boolean runOnThreads = false;
+    	boolean runOnThreads = true;
     	String host;
     	
     	//initialization
@@ -22,14 +22,14 @@ public class Test {
     	
     	//run
     	if(runOnThreads) {
-        	for(int i = 0; i < 10; i++) {
-        		Thread t = new Thread(new RandomTemperatureSensorClient(host, CapitalManager.getInstance()));
+        	for(int i = 0; i < 100; i++) {
+        		Thread t = new Thread(new SimulatedTemperatureSensorClient(host, CapitalManager.getInstance()));
         		
         		t.start();
         		Thread.sleep(100);
         	}
     	}else {
-    		RandomTemperatureSensorClient sensor = new RandomTemperatureSensorClient(host, CapitalManager.getInstance());
+    		SimulatedTemperatureSensorClient sensor = new SimulatedTemperatureSensorClient(host, CapitalManager.getInstance());
     		sensor.run();
     	}
 

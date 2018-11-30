@@ -1,9 +1,9 @@
 package mcalzaferri.project.heatmap.client;
 
 import java.io.IOException;
-import java.util.Date;
 
 import mcalzaferri.geo.CapitalManager;
+import mcalzaferri.geo.GeoLocation;
 import mcalzaferri.project.heatmap.common.entities.TemperatureSensorData;
 
 public abstract class TemperatureSensorClient extends SensorClient{
@@ -13,11 +13,12 @@ public abstract class TemperatureSensorClient extends SensorClient{
 	}
 	
 	@Override
-	protected Object getSensorData() {
-		return new TemperatureSensorData(getTemperature(), new Date());
+	protected Object getSensorData(GeoLocation location) {
+		return getTemperatureSensorData(location);
 	}
 	
-	public abstract double getTemperature();
+	public abstract TemperatureSensorData getTemperatureSensorData(GeoLocation location);
+	
 	
 
 }
