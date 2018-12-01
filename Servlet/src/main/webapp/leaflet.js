@@ -1,5 +1,6 @@
 var mymap = L.map('mapid').setView([51.505, -0.09], 3);
 var apiUrl = "https://heatmap-219120.appspot.com/api";
+var charts = [];
 
 window.onload = addMarkersToMap();
 
@@ -61,7 +62,7 @@ function calculateMinZoom(newSize) {
 }
 
 function panToCenter() {
-    if(mymap.getBounds().getEast() > 300 || mymap.getBounds().getWest() < -300){
+    if (mymap.getBounds().getEast() > 300 || mymap.getBounds().getWest() < -300) {
         mymap.panInsideBounds([
             [-90, -190],
             [90, 190]
@@ -78,35 +79,84 @@ function addMarkersToMap() {
             marker.id = data[i].id;
             marker.on('click', onMarkerClick);
             function onMarkerClick(e) {
-                var popup = e.target.getPopup();
+                var exists = false;
                 var chartId = "chart" + e.target.id;
-                var jsonExportUrl = sensorUrl + "/" + e.target.id + "/measurements.json?orderBy=+timestamp";
-                var csvExportUrl = sensorUrl + "/" + e.target.id + "/measurements.csv?orderBy=+timestamp";
-                popup.setContent(
-                    '<canvas id="' + chartId + '" width="400" height="400"><p>ERROR: Could not load data!</p></canvas>' +
-                    '<section style="display: table; clear: both; width: 70%;">' +
-                    '   <attributes style="float: left;">' +
-                    '       <p><b>Average Year:</b></p>' +
-                    '       <p><b>Average Month:</b></p>' +
-                    '       <p><b>Average Week:</b></p>' +
-                    '       <p><b>Average Day:</b></p>' +
-                    '       <p><b>Average Hour:</b></p>' +
-                    '   </attributes>' +
-                    '   <values style="float: right;">' +
-                    '       <p id="avgyear'+ e.target.id +'">No data available</p>' +
-                    '       <p id="avgmonth'+ e.target.id +'">No data available</p>' +
-                    '       <p id="avgweek'+ e.target.id +'">No data available</p>' +
-                    '       <p id="avgday'+ e.target.id +'">No data available</p>' +
-                    '       <p id="avghour'+ e.target.id +'">No data available</p>' +
-                    '   </values>' +
-                    '</section>' +
-                    '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
-                    '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>'
-                );
+                charts.forEach(function (chart, index, array) {
+                    if (chart.id == e.target.id) {
+                        exists = true;
+                    }
+                });
+                if (!exists) {
+                    var popup = e.target.getPopup();
+
+                    var jsonExportUrl = sensorUrl + "/" + e.target.id + "/measurements.json?orderBy=+timestamp";
+                    var csvExportUrl = sensorUrl + "/" + e.target.id + "/measurements.csv?orderBy=+timestamp";
+                    popup.setContent(
+                        '<div class="tab" width="400">' +
+                        '   <button class="tabbutton" onclick="showDay(' + e.target.id + ')">Day</button>' +
+                        '   <button class="tabbutton" onclick="showWeek(' + e.target.id + ')">Week</button>' +
+                        '   <button class="tabbutton" onclick="showMonth(' + e.target.id + ')">Month</button>' +
+                        '   <button class="tabbutton" onclick="showYear(' + e.target.id + ')">Year</button>' +
+                        '   <button class="tabbutton" onclick="showAll(' + e.target.id + ')">All</button>' +
+                        '</div>' +
+                        '<canvas class="chart" id="' + chartId + '" width="400" height="400"">' +
+                        '   <p>ERROR: Could not load data!</p>' +
+                        '</canvas>' +
+                        '<section class="avgtable">' +
+                        '   <attributes>' +
+                        '       <p><b>Average Year:</b></p>' +
+                        '       <p><b>Average Month:</b></p>' +
+                        '       <p><b>Average Week:</b></p>' +
+                        '       <p><b>Average Day:</b></p>' +
+                        '       <p><b>Average Hour:</b></p>' +
+                        '   </attributes>' +
+                        '   <values>' +
+                        '       <p id="avgyear' + e.target.id + '">No data available</p>' +
+                        '       <p id="avgmonth' + e.target.id + '">No data available</p>' +
+                        '       <p id="avgweek' + e.target.id + '">No data available</p>' +
+                        '       <p id="avgday' + e.target.id + '">No data available</p>' +
+                        '       <p id="avghour' + e.target.id + '">No data available</p>' +
+                        '   </values>' +
+                        '</section>' +
+                        '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
+                        '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>'
+                    );
+                }
                 drawChartAndAverage(document.getElementById(chartId), e.target.id);
             }
         }
     });
+}
+
+function showDay(sensorId) {
+    charts.forEach(function (chart, index, array) {
+        if (chart.id == sensorId) {
+            chart.config.options.scales.xAxes = [{
+                type: 'time',
+                position: 'bottom',
+                ticks: {
+                    min: new Date(1533081600)
+                }
+            }];
+        }
+        chart.chart.update();
+    });
+}
+
+function showWeek(sensorId) {
+
+}
+
+function showMonth(sensorId) {
+
+}
+
+function showYear(sensorId) {
+
+}
+
+function showAll(sensorId) {
+
 }
 
 function drawChartAndAverage(ctx, sensorId) {
@@ -126,7 +176,13 @@ function drawChartAndAverage(ctx, sensorId) {
             measurements.push(point);
         }
         drawAverages(data, sensorId);
-        new Chart(ctx, {
+        var exists = false;
+        charts.forEach(function (chart, index, array) {
+            if (chart.id == sensorId) {
+                exists = true;
+            }
+        });
+        var config = {
             type: 'line',
             data: {
                 datasets: [{
@@ -142,10 +198,28 @@ function drawChartAndAverage(ctx, sensorId) {
                     }]
                 }
             }
-        });
+        };
+        var chart = {
+            id: 0,
+            config: null,
+            chart: null
+        };
+        chart.id = sensorId;
+        chart.config = config;
+        chart.chart = new Chart(ctx, config);
+        if(!exists){
+            charts.push(chart);
+        }else{
+            charts.forEach(function (c, index, array) {
+                if (c.id == sensorId) {
+                    charts[index] = chart;
+                }
+            });
+        }
     });
 }
-function drawAverages(data, sensorId){
+
+function drawAverages(data, sensorId) {
     var avghour = { value: 0.0, count: 0 };
     var avgday = { value: 0.0, count: 0 };
     var avgweek = { value: 0.0, count: 0 };
@@ -166,7 +240,7 @@ function drawAverages(data, sensorId){
                     if (now.getUTCDate() == date.getUTCDate()) {
                         avgday.value += data[i].temperature;
                         avgday.count++;
-                        if(now.getUTCHours() == date.getUTCHours()){
+                        if (now.getUTCHours() == date.getUTCHours()) {
                             avghour.value += data[i].temperature;
                             avghour.count++;
                         }
