@@ -1,13 +1,15 @@
 var mymap = L.map('mapid').setView([51.505, -0.09], 3);
 var apiUrl = "https://heatmap-219120.appspot.com/api";
+var sensorUrl = apiUrl + "/sensors"
 var charts = [];
+var mapZoomDelta = 0.2;
 
 window.onload = addMarkersToMap();
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
     maxZoom: 9,
     minZoom: 1,
-    zoomDelta: 0.2,
+    zoomDelta: mapZoomDelta,
     //noWrap: true,
     bounds: [
         [-90, -300],
@@ -34,6 +36,7 @@ mymap.on('zoomend', function () {
 var moveEndTimeout;
 var mouseDown = false;
 mymap.on('moveend', function () {
+    //Make sure mouse is not pressed when trying to pan to center for better user experience
     if (!mouseDown) {
         clearTimeout(moveEndTimeout);
         moveEndTimeout = setTimeout(panToCenter, 100);
@@ -50,13 +53,14 @@ mymap.on('mouseup', function () {
 })
 
 function calculateMinZoom(newSize) {
-    //Only called when resizing the window
-    var factor = Math.pow(2, 0.2);
+    var factor = Math.pow(2, mapZoomDelta);
+    //256x256 is the required space of the map at zoom level 0
     var size = 256;
     var minZoomLevel = 0;
+    //Increase minZoomLevel until new size at min zoom level will completly take up the new size
     while (size < newSize.x || size < newSize.y) {
         size *= factor;
-        minZoomLevel += 0.2;
+        minZoomLevel += mapZoomDelta;
     }
     mymap.setMinZoom(minZoomLevel);
 }
@@ -71,7 +75,6 @@ function panToCenter() {
 }
 
 function addMarkersToMap() {
-    var sensorUrl = apiUrl + "/sensors"
     $.get(sensorUrl, function (data, status) {
         for (var i = 0; i < data.length; i++) {
             var marker = L.marker([data[i].location.latitude, data[i].location.longitude]).addTo(mymap);
@@ -88,39 +91,7 @@ function addMarkersToMap() {
                 });
                 if (!exists) {
                     var popup = e.target.getPopup();
-
-                    var jsonExportUrl = sensorUrl + "/" + e.target.id + "/measurements.json?orderBy=+timestamp";
-                    var csvExportUrl = sensorUrl + "/" + e.target.id + "/measurements.csv?orderBy=+timestamp";
-                    popup.setContent(
-                        '<div class="tab" width="400">' +
-                        '   <button class="tabbutton" onclick="showDay(' + e.target.id + ')">Day</button>' +
-                        '   <button class="tabbutton" onclick="showWeek(' + e.target.id + ')">Week</button>' +
-                        '   <button class="tabbutton" onclick="showMonth(' + e.target.id + ')">Month</button>' +
-                        '   <button class="tabbutton" onclick="showYear(' + e.target.id + ')">Year</button>' +
-                        '   <button class="tabbutton" onclick="showAll(' + e.target.id + ')">All</button>' +
-                        '</div>' +
-                        '<canvas class="chart" id="' + chartId + '" width="400" height="400"">' +
-                        '   <p>ERROR: Could not load data!</p>' +
-                        '</canvas>' +
-                        '<section class="avgtable">' +
-                        '   <attributes>' +
-                        '       <p><b>Average Year:</b></p>' +
-                        '       <p><b>Average Month:</b></p>' +
-                        '       <p><b>Average Week:</b></p>' +
-                        '       <p><b>Average Day:</b></p>' +
-                        '       <p><b>Average Hour:</b></p>' +
-                        '   </attributes>' +
-                        '   <values>' +
-                        '       <p id="avgyear' + e.target.id + '">No data available</p>' +
-                        '       <p id="avgmonth' + e.target.id + '">No data available</p>' +
-                        '       <p id="avgweek' + e.target.id + '">No data available</p>' +
-                        '       <p id="avgday' + e.target.id + '">No data available</p>' +
-                        '       <p id="avghour' + e.target.id + '">No data available</p>' +
-                        '   </values>' +
-                        '</section>' +
-                        '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
-                        '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>'
-                    );
+                    popup.setContent(getPopupHtml(e.target.id, chartId));
                 }
                 drawChartAndAverage(document.getElementById(chartId), e.target.id);
             }
@@ -128,95 +99,171 @@ function addMarkersToMap() {
     });
 }
 
-function showDay(sensorId) {
+function getPopupHtml(targetId, chartId) {
+    var jsonExportUrl = sensorUrl + "/" + targetId + "/measurements.json?orderBy=+timestamp";
+    var csvExportUrl = sensorUrl + "/" + targetId + "/measurements.csv?orderBy=+timestamp";
+
+    var html =
+        '<div class="tab" width="400">' +
+        '   <button class="tabbutton" onclick="showDay(event,' + targetId + ')">Day</button>' +
+        '   <button class="tabbutton" onclick="showWeek(event,' + targetId + ')">Week</button>' +
+        '   <button class="tabbutton" onclick="showMonth(event,' + targetId + ')">Month</button>' +
+        '   <button class="tabbutton" onclick="showYear(event,' + targetId + ')">Year</button>' +
+        '   <button class="tabbutton active" onclick="showAll(event,' + targetId + ')">All</button>' +
+        '</div>' +
+        '<canvas class="chart" id="' + chartId + '" width="400" height="400"">' +
+        '   <p>ERROR: Could not load data!</p>' +
+        '</canvas>' +
+        '<section class="avgtable">' +
+        '   <attributes>' +
+        '       <p><b>Average Year:</b></p>' +
+        '       <p><b>Average Month:</b></p>' +
+        '       <p><b>Average Week:</b></p>' +
+        '       <p><b>Average Day:</b></p>' +
+        '       <p><b>Average Hour:</b></p>' +
+        '   </attributes>' +
+        '   <values>' +
+        '       <p id="avgyear' + targetId + '">No data available</p>' +
+        '       <p id="avgmonth' + targetId + '">No data available</p>' +
+        '       <p id="avgweek' + targetId + '">No data available</p>' +
+        '       <p id="avgday' + targetId + '">No data available</p>' +
+        '       <p id="avghour' + targetId + '">No data available</p>' +
+        '   </values>' +
+        '</section>' +
+        '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
+        '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>';
+    return html;
+}
+
+function showDay(evt, sensorId) {
+    handleTabButtonPress(evt);
+    showPeriod(sensorId, getDateBeforeAmountOfDays(1), new Date(), 'hour');
+}
+
+function showWeek(evt, sensorId) {
+    handleTabButtonPress(evt);
+    showPeriod(sensorId, getDateBeforeAmountOfDays(7), new Date(), 'day');
+}
+
+function showMonth(evt, sensorId) {
+    handleTabButtonPress(evt);
+    showPeriod(sensorId, getDateBeforeAmountOfDays(31), new Date(), 'day');
+}
+
+function showYear(evt, sensorId) {
+    handleTabButtonPress(evt);
+    showPeriod(sensorId, getDateBeforeAmountOfDays(365), new Date(), 'month');
+}
+
+function showAll(evt, sensorId) {
+    handleTabButtonPress(evt);
+    showPeriod(sensorId, null, new Date(), 'quarter');
+}
+
+function getDateBeforeAmountOfDays(days) {
+    return new Date(Date.now() - getMilisecondsPerDay() * days);
+}
+
+function getMilisecondsPerDay() {
+    return 1000 * 3600 * 24;
+}
+
+function showPeriod(sensorId, minDate, maxDate, timeUnit) {
     charts.forEach(function (chart, index, array) {
         if (chart.id == sensorId) {
             chart.config.options.scales.xAxes = [{
                 type: 'time',
                 position: 'bottom',
-                ticks: {
-                    min: new Date(1533081600)
+                time: {
+                    min: minDate,
+                    max: maxDate,
+                    unit: timeUnit
                 }
             }];
+            chart.chart.update();
         }
-        chart.chart.update();
     });
 }
 
-function showWeek(sensorId) {
-
-}
-
-function showMonth(sensorId) {
-
-}
-
-function showYear(sensorId) {
-
-}
-
-function showAll(sensorId) {
-
+function handleTabButtonPress(evt){
+    var tabButtons = document.getElementsByClassName("tabbutton");
+    for (i = 0; i < tabButtons.length; i++) {
+      tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+    }
+    evt.currentTarget.className += " active";
 }
 
 function drawChartAndAverage(ctx, sensorId) {
     var url = apiUrl + "/sensors/" + sensorId + "/measurements?orderBy=+timestamp";
     var measurements = [];
     $.get(url, function (data, status) {
-        var avgday = { value: 0.0, count: 0 };
-        var avgweek = { value: 0.0, count: 0 };
-        var avgmonth = { value: 0.0, count: 0 };
-        var avgyear = { value: 0.0, count: 0 };
-        var now = new Date(Date.now());
         for (var i = 0; i < data.length; i++) {
-            var point = {
+            var measurement = {
                 x: new Date(data[i].timestamp),
                 y: data[i].temperature
             };
-            measurements.push(point);
+            measurements.push(measurement);
         }
         drawAverages(data, sensorId);
-        var exists = false;
-        charts.forEach(function (chart, index, array) {
-            if (chart.id == sensorId) {
-                exists = true;
-            }
-        });
-        var config = {
-            type: 'line',
-            data: {
-                datasets: [{
-                    label: "Temperature in degree Celcius",
-                    data: measurements
-                }]
-            },
-            options: {
-                scales: {
-                    xAxes: [{
-                        type: 'time',
-                        position: 'bottom'
-                    }]
-                }
-            }
-        };
-        var chart = {
-            id: 0,
-            config: null,
-            chart: null
-        };
-        chart.id = sensorId;
-        chart.config = config;
-        chart.chart = new Chart(ctx, config);
-        if(!exists){
-            charts.push(chart);
-        }else{
-            charts.forEach(function (c, index, array) {
-                if (c.id == sensorId) {
-                    charts[index] = chart;
-                }
-            });
+        drawChart(sensorId, measurements, ctx);
+    });
+}
+
+function drawChart(sensorId, measurements, ctx) {
+    var exists = false;
+    charts.forEach(function (chart, index, array) {
+        if (chart.id == sensorId) {
+            exists = true;
         }
     });
+    var chart = createChart(sensorId, measurements, ctx);
+    if (!exists) {
+        charts.push(chart);
+    } else {
+        charts.forEach(function (c, index, array) {
+            if (c.id == sensorId) {
+                charts[index] = chart;
+            }
+        });
+    }
+}
+
+function getChartConfiguration(measurements){
+    return {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: "Temperature in degree Celcius",
+                data: measurements
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'time',
+                    position: 'bottom',
+                    time: {
+                        min: null,
+                        max: new Date()
+                    }
+                }]
+            }
+        }
+    };
+}
+
+function createChart(sensorId, measurements, ctx){
+    var config = getChartConfiguration(measurements);
+    var chart = {
+        id: 0,
+        config: null,
+        chart: null
+    };
+    chart.id = sensorId;
+    chart.config = config;
+    chart.chart = new Chart(ctx, config);
+    chart.chart.update();
+    return chart;
 }
 
 function drawAverages(data, sensorId) {
@@ -256,8 +303,8 @@ function drawAverages(data, sensorId) {
     drawAverageToParagraph(avgyear, "avgyear" + sensorId);
 }
 
-function drawAverageToParagraph(avg, id) {
+function drawAverageToParagraph(avg, paragraphId) {
     if (avg.count > 0) {
-        document.getElementById(id).innerHTML = (avg.value / avg.count).toFixed(1) + " &#176C";
+        document.getElementById(paragraphId).innerHTML = (avg.value / avg.count).toFixed(1) + " &#176C";
     }
 }
