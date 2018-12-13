@@ -111,9 +111,7 @@ function getPopupHtml(targetId, chartId) {
         '   <button class="tabbutton" onclick="showYear(event,' + targetId + ')">Year</button>' +
         '   <button class="tabbutton active" onclick="showAll(event,' + targetId + ')">All</button>' +
         '</div>' +
-        '<canvas class="chart" id="' + chartId + '" width="400" height="400"">' +
-        '   <p>ERROR: Could not load data!</p>' +
-        '</canvas>' +
+        '<canvas class="chart" id="' + chartId + '" width="400" height="400""></canvas>' +
         '<section class="avgtable">' +
         '   <attributes>' +
         '       <p><b>Average Year:</b></p>' +
@@ -130,8 +128,10 @@ function getPopupHtml(targetId, chartId) {
         '       <p id="avghour' + targetId + '">No data available</p>' +
         '   </values>' +
         '</section>' +
-        '<button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
-        '<button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>';
+        '<div class="export" width="400">' +
+        '   <button type="button" onclick="window.location.href=\'' + jsonExportUrl + '\'">JSON export</button>' +
+        '   <button type="button" onclick="window.location.href=\'' + csvExportUrl + '\'">CSV export</button>' +
+        '</div>';
     return html;
 }
 
@@ -185,10 +185,10 @@ function showPeriod(sensorId, minDate, maxDate, timeUnit) {
     });
 }
 
-function handleTabButtonPress(evt){
+function handleTabButtonPress(evt) {
     var tabButtons = document.getElementsByClassName("tabbutton");
     for (i = 0; i < tabButtons.length; i++) {
-      tabButtons[i].className = tabButtons[i].className.replace(" active", "");
+        tabButtons[i].className = tabButtons[i].className.replace(" active", "");
     }
     evt.currentTarget.className += " active";
 }
@@ -228,7 +228,7 @@ function drawChart(sensorId, measurements, ctx) {
     }
 }
 
-function getChartConfiguration(measurements){
+function getChartConfiguration(measurements) {
     return {
         type: 'line',
         data: {
@@ -244,7 +244,8 @@ function getChartConfiguration(measurements){
                     position: 'bottom',
                     time: {
                         min: null,
-                        max: new Date()
+                        max: new Date(),
+                        unit: 'quarter'
                     }
                 }]
             }
@@ -252,7 +253,7 @@ function getChartConfiguration(measurements){
     };
 }
 
-function createChart(sensorId, measurements, ctx){
+function createChart(sensorId, measurements, ctx) {
     var config = getChartConfiguration(measurements);
     var chart = {
         id: 0,
@@ -275,19 +276,19 @@ function drawAverages(data, sensorId) {
     var now = new Date(Date.now());
     for (var i = 0; i < data.length; i++) {
         var date = new Date(data[i].timestamp);
-        if (now.getUTCFullYear() == date.getUTCFullYear()) {
+        if (getDateBeforeAmountOfDays(365).getTime() < date.getTime()) {
             avgyear.value += data[i].temperature;
             avgyear.count++;
-            if (now.getUTCMonth() == date.getUTCMonth()) {
+            if (getDateBeforeAmountOfDays(31).getTime() < date.getTime()) {
                 avgmonth.value += data[i].temperature;
                 avgmonth.count++;
-                if (now.getUTCDate() - date.getUTCDate() < 7 && now.getUTCDay() >= date.getUTCDay()) {
+                if (getDateBeforeAmountOfDays(7).getTime() < date.getTime()) {
                     avgweek.value += data[i].temperature;
                     avgweek.count++;
-                    if (now.getUTCDate() == date.getUTCDate()) {
+                    if (getDateBeforeAmountOfDays(1).getTime() < date.getTime()) {
                         avgday.value += data[i].temperature;
                         avgday.count++;
-                        if (now.getUTCHours() == date.getUTCHours()) {
+                        if (getDateBeforeAmountOfDays(1/24).getTime() < date.getTime()) {
                             avghour.value += data[i].temperature;
                             avghour.count++;
                         }

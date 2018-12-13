@@ -7,6 +7,7 @@
     <include path="index.html"></include>
     <include path="leaflet.js"></include>
     <include path="datastoreConfiguration.json"></include>
+    <include path="leaflet.css"></include>
   </static-files>
   <sessions-enabled>false</sessions-enabled>
   <runtime>java8</runtime>
