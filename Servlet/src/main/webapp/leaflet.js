@@ -3,6 +3,8 @@ var apiUrl = "https://heatmap-219120.appspot.com/api";
 var sensorUrl = apiUrl + "/sensors"
 var charts = [];
 var mapZoomDelta = 0.2;
+var rawMeasurements = [];
+var measurements = [];
 
 window.onload = addMarkersToMap();
 
@@ -171,16 +173,7 @@ function getMilisecondsPerDay() {
 function showPeriod(sensorId, minDate, maxDate, timeUnit) {
     charts.forEach(function (chart, index, array) {
         if (chart.id == sensorId) {
-            chart.config.options.scales.xAxes = [{
-                type: 'time',
-                position: 'bottom',
-                time: {
-                    min: minDate,
-                    max: maxDate,
-                    unit: timeUnit
-                }
-            }];
-            chart.chart.update();
+            updateChartConfiguration(chart.chart, minDate, maxDate, timeUnit);
         }
     });
 }
@@ -195,28 +188,29 @@ function handleTabButtonPress(evt) {
 
 function drawChartAndAverage(ctx, sensorId) {
     var url = apiUrl + "/sensors/" + sensorId + "/measurements?orderBy=+timestamp";
-    var measurements = [];
+    rawMeasurements = [];
     $.get(url, function (data, status) {
         for (var i = 0; i < data.length; i++) {
             var measurement = {
                 x: new Date(data[i].timestamp),
                 y: data[i].temperature
             };
-            measurements.push(measurement);
+            rawMeasurements.push(measurement);
         }
+        measurements = rawMeasurements;
         drawAverages(data, sensorId);
-        drawChart(sensorId, measurements, ctx);
+        drawChart(sensorId, ctx);
     });
 }
 
-function drawChart(sensorId, measurements, ctx) {
+function drawChart(sensorId, ctx) {
     var exists = false;
     charts.forEach(function (chart, index, array) {
         if (chart.id == sensorId) {
             exists = true;
         }
     });
-    var chart = createChart(sensorId, measurements, ctx);
+    var chart = createChart(sensorId, ctx);
     if (!exists) {
         charts.push(chart);
     } else {
@@ -228,7 +222,25 @@ function drawChart(sensorId, measurements, ctx) {
     }
 }
 
-function getChartConfiguration(measurements) {
+function createChart(sensorId, ctx) {
+    var config = getChartConfiguration(null, new Date(), 'quarter');
+    var chart = {
+        id: 0,
+        chart: null
+    };
+    chart.id = sensorId;
+    chart.chart = new Chart(ctx, config);
+    chart.chart.update();
+    return chart;
+}
+
+function updateChartConfiguration(chart, minDate, maxDate, timeUnit) {
+    var newConfig = getChartConfiguration(minDate, maxDate, timeUnit);
+    chart.options = newConfig.options;
+    chart.update();
+}
+
+function getChartConfiguration(minDate, maxDate, timeUnit) {
     return {
         type: 'line',
         data: {
@@ -243,28 +255,14 @@ function getChartConfiguration(measurements) {
                     type: 'time',
                     position: 'bottom',
                     time: {
-                        min: null,
-                        max: new Date(),
-                        unit: 'quarter'
+                        min: minDate,
+                        max: maxDate,
+                        unit: timeUnit
                     }
                 }]
             }
         }
     };
-}
-
-function createChart(sensorId, measurements, ctx) {
-    var config = getChartConfiguration(measurements);
-    var chart = {
-        id: 0,
-        config: null,
-        chart: null
-    };
-    chart.id = sensorId;
-    chart.config = config;
-    chart.chart = new Chart(ctx, config);
-    chart.chart.update();
-    return chart;
 }
 
 function drawAverages(data, sensorId) {
@@ -288,7 +286,7 @@ function drawAverages(data, sensorId) {
                     if (getDateBeforeAmountOfDays(1).getTime() < date.getTime()) {
                         avgday.value += data[i].temperature;
                         avgday.count++;
-                        if (getDateBeforeAmountOfDays(1/24).getTime() < date.getTime()) {
+                        if (getDateBeforeAmountOfDays(1 / 24).getTime() < date.getTime()) {
                             avghour.value += data[i].temperature;
                             avghour.count++;
                         }
